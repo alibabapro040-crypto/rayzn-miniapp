@@ -19,7 +19,7 @@
             overflow-x: hidden;
             padding: 15px 10px 30px;
         }
-        .header { text-align: center; margin-bottom: 8px; }
+        .header { text-align: center; margin-bottom: 15px; }
         .header h1 {
             font-size: 1.6em;
             font-weight: 900;
@@ -30,6 +30,81 @@
             letter-spacing: 2px;
         }
         .header .subtitle { font-size: 0.82em; color: #aaa; margin-top: 3px; }
+        
+        /* UID Giriş Formu */
+        .uid-form {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            padding: 25px 20px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .uid-form h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .uid-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .uid-input:focus {
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        .uid-input::placeholder {
+            color: #666;
+        }
+        .uid-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1a0a00;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .uid-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 25px rgba(255, 165, 0, 0.5);
+        }
+        .uid-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .uid-info {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        
+        /* Çark Bölümü (Başlangıçta gizli) */
+        .wheel-section {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .wheel-section.show {
+            display: flex;
+        }
         .uid-display {
             background: rgba(255, 215, 0, 0.1);
             border: 1px solid rgba(255, 215, 0, 0.3);
@@ -193,6 +268,18 @@
             border-radius: 25px;
             cursor: pointer;
         }
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top-color: #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+        }
+        .loading-spinner.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -202,24 +289,42 @@
     <p class="subtitle">✨ Bugünkü şansını dene!</p>
 </div>
 
-<div class="uid-display" id="uid-display">🆔 Kullanıcı ID: <span id="uid-span">-</span></div>
-
-<div class="wheel-wrapper">
-    <svg class="pointer" width="30" height="36" viewBox="0 0 30 36">
-        <polygon points="15,2 28,34 2,34" fill="#FFD700" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
-    </svg>
-    <div class="wheel-ring"></div>
-    <canvas id="wheel-canvas" width="310" height="310"></canvas>
-    <div class="spinning-overlay" id="spinning-ring"></div>
-    <div class="center-hub">🎰</div>
+<!-- UID Giriş Formu -->
+<div class="uid-form" id="uid-form">
+    <h3>🆔 Kullanıcı ID Girişi</h3>
+    <input type="number" class="uid-input" id="uid-input" placeholder="Telegram ID'nizi girin">
+    <button class="uid-btn" id="uid-btn" onclick="submitUid()">Devam Et</button>
+    <div class="loading-spinner" id="loading-spinner"></div>
+    <p class="uid-info">
+        💡 Telegram ID'nizi öğrenmek için:<br>
+        @userinfobot botuna gidin ve<br>
+        "/start" yazın
+    </p>
 </div>
 
-<button id="spin-btn" class="idle" onclick="startSpin()">🎰 ÇARKI ÇEVİR</button>
+<!-- Çark Bölümü (Başlangıçta gizli) -->
+<div class="wheel-section" id="wheel-section">
+    <div class="uid-display">🆔 Kullanıcı ID: <span id="uid-span">-</span></div>
+    
+    <div class="wheel-wrapper">
+        <svg class="pointer" width="30" height="36" viewBox="0 0 30 36">
+            <polygon points="15,2 28,34 2,34" fill="#FFD700" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+        </svg>
+        <div class="wheel-ring"></div>
+        <canvas id="wheel-canvas" width="310" height="310"></canvas>
+        <div class="spinning-overlay" id="spinning-ring"></div>
+        <div class="center-hub">🎰</div>
+    </div>
 
-<div id="result-box">
-    <div class="result-emoji" id="result-emoji">🎉</div>
-    <div class="result-prize" id="result-prize">5 TL</div>
-    <div class="result-added">Ödülünüz: <strong id="result-amount">5 TL</strong> bakiyenize ekleniyor...</div>
+    <button id="spin-btn" class="idle" onclick="startSpin()">🎰 ÇARKI ÇEVİR</button>
+
+    <div id="result-box">
+        <div class="result-emoji" id="result-emoji">🎉</div>
+        <div class="result-prize" id="result-prize">5 TL</div>
+        <div class="result-added">Ödülünüz: <strong id="result-amount">5 TL</strong> bakiyenize ekleniyor...</div>
+    </div>
+
+    <p class="info-row">🍀 Her gün 1 kez çevirebilirsiniz</p>
 </div>
 
 <div class="error-box" id="error-box">
@@ -227,8 +332,6 @@
     <div class="error-text" id="error-text">Bir hata oluştu!</div>
     <button class="error-btn" onclick="closeApp()">Kapat</button>
 </div>
-
-<p class="info-row">🍀 Her gün 1 kez çevirebilirsiniz</p>
 
 <script>
 const tg = window.Telegram.WebApp;
@@ -239,22 +342,11 @@ tg.setBackgroundColor('#0f0c29');
 
 // URL'den parametreleri al
 const params = new URLSearchParams(window.location.search);
-const USER_UID = params.get('uid') || '';
 const ALREADY_SPUN = params.get('already_spun') === '1';
 
-// UID'yi göster
-document.getElementById('uid-span').textContent = USER_UID || 'Bilinmiyor';
-
-// Eğer zaten çevrilmişse butonu devre dışı bırak
-if (ALREADY_SPUN) {
-    const btn = document.getElementById('spin-btn');
-    btn.disabled = true;
-    btn.textContent = '⏰ Bugün Kullandın';
-    btn.classList.remove('idle');
-}
+let USER_UID = '';
 
 // GERÇEK ÖDÜLLER (Bot ile aynı olmalı!)
-// Sadece 1 TL ve 5 TL kazanılabilir
 const REAL_PRIZES = [
     { label: "💰 1 TL", amount: 1, weight: 85 },   // %85 ihtimal
     { label: "🎁 5 TL", amount: 5, weight: 15 }    // %15 ihtimal
@@ -283,6 +375,60 @@ const SIZE = 310, CX = SIZE / 2, CY = SIZE / 2, RADIUS = CX - 6;
 let currentAngle = -Math.PI / 2;
 let isSpinning = false;
 let spinDone = false;
+
+// UID Giriş Fonksiyonu
+function submitUid() {
+    const input = document.getElementById('uid-input');
+    const uid = input.value.trim();
+    
+    if (!uid || uid === '') {
+        tg.showAlert('Lütfen geçerli bir Kullanıcı ID girin!');
+        return;
+    }
+    
+    if (!/^\d+$/.test(uid)) {
+        tg.showAlert('Kullanıcı ID sadece rakamlardan oluşmalıdır!');
+        return;
+    }
+    
+    USER_UID = uid;
+    
+    // Yükleme göster
+    document.getElementById('uid-btn').style.display = 'none';
+    document.getElementById('loading-spinner').classList.add('show');
+    
+    // Bot'a UID kontrolü gönder
+    setTimeout(() => {
+        // UID kontrol verisini gönder
+        tg.sendData(JSON.stringify({
+            action: "check_uid",
+            uid: USER_UID
+        }));
+        
+        // Çark bölümünü göster
+        document.getElementById('uid-form').style.display = 'none';
+        document.getElementById('wheel-section').classList.add('show');
+        document.getElementById('uid-span').textContent = USER_UID;
+        
+        // Eğer zaten çevrilmişse butonu devre dışı bırak
+        if (ALREADY_SPUN) {
+            const btn = document.getElementById('spin-btn');
+            btn.disabled = true;
+            btn.textContent = '⏰ Bugün Kullandın';
+            btn.classList.remove('idle');
+        }
+        
+        // Çarkı çiz
+        drawWheel(currentAngle);
+    }, 1000);
+}
+
+// Enter tuşu desteği
+document.getElementById('uid-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        submitUid();
+    }
+});
 
 function drawWheel(rot) {
     ctx.clearRect(0, 0, SIZE, SIZE);
@@ -356,31 +502,25 @@ function selectPrize() {
             return prize;
         }
     }
-    return REAL_PRIZES[0]; // Varsayılan
+    return REAL_PRIZES[0];
 }
 
 // Ödülü görsel segment index'ine dönüştür
 function getPrizeIndex(prizeLabel) {
-    // Ödül label'ından sadece sayıyı çıkar (örn: "💰 1 TL" -> "1 TL")
     const cleanLabel = prizeLabel.replace(/[^0-9\sTL]/g, '').trim();
-    
-    // Görsel segmentlerde ara
     for (let i = 0; i < SEGMENTS.length; i++) {
         if (SEGMENTS[i].label === cleanLabel) {
             return i;
         }
     }
-    return 0; // Varsayılan: ilk segment
+    return 0;
 }
-
-drawWheel(currentAngle);
 
 function startSpin() {
     if (isSpinning || spinDone) return;
     
-    // UID kontrolü
     if (!USER_UID) {
-        showError('Kullanıcı ID bulunamadı! Lütfen bot üzerinden çarkı açın.');
+        showError('Kullanıcı ID bulunamadı!');
         return;
     }
     
@@ -394,11 +534,9 @@ function startSpin() {
 
     try { tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
 
-    // Ödülü seç
     const selectedPrize = selectPrize();
     const prizeIndex = getPrizeIndex(selectedPrize.label);
     
-    // Hedef: Seçilen ödül işaretçinin (üst = -PI/2) altına gelsin
     const safeOffset = (Math.random() - 0.5) * ARC * 0.42;
     const targetAngle = (-Math.PI / 2) - prizeIndex * ARC - ARC / 2 + safeOffset;
     const totalRot = 9 * 2 * Math.PI + (targetAngle - currentAngle);
@@ -430,7 +568,7 @@ function onSpinComplete(prize) {
     document.getElementById('spinning-ring').classList.remove('active');
     try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
 
-    document.getElementById('result-emoji').textContent  = prize.label.split(' ')[0]; // Emoji
+    document.getElementById('result-emoji').textContent  = prize.label.split(' ')[0];
     document.getElementById('result-prize').textContent  = prize.label;
     document.getElementById('result-amount').textContent = prize.amount + ' TL';
     document.getElementById('result-box').classList.add('show');
@@ -438,54 +576,9 @@ function onSpinComplete(prize) {
 
     spawnConfetti();
 
-    // Bot'a sonucu gönder
     setTimeout(() => {
         const resultData = {
             action: "spin_result",
             uid: USER_UID,
             prize_label: prize.label,
-            prize_amount: prize.amount
-        };
-        
-        console.log('Gönderilen veri:', resultData);
-        tg.sendData(JSON.stringify(resultData));
-    }, 2200);
-}
-
-function showError(message) {
-    document.getElementById('error-text').textContent = message;
-    document.getElementById('error-box').classList.add('show');
-    document.getElementById('spin-btn').style.display = 'none';
-    document.querySelector('.wheel-wrapper').style.display = 'none';
-    document.getElementById('uid-display').style.display = 'none';
-}
-
-function closeApp() {
-    tg.close();
-}
-
-const CONF_COLORS = ['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#C3A6FF','#7fff7f','#FFA07A','#ff69b4'];
-function spawnConfetti() {
-    for (let i = 0; i < 60; i++) {
-        setTimeout(() => {
-            const el = document.createElement('div');
-            el.className = 'confetti-piece';
-            el.style.cssText = `
-                left:${Math.random()*100}vw;
-                top:-12px;
-                width:${6+Math.random()*8}px;
-                height:${6+Math.random()*8}px;
-                background:${CONF_COLORS[Math.floor(Math.random()*CONF_COLORS.length)]};
-                border-radius:${Math.random()>0.5?'50%':'2px'};
-                animation-duration:${2.5+Math.random()*2.5}s;
-                animation-delay:${Math.random()*0.6}s;
-            `;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 6000);
-        }, i * 35);
-    }
-}
-</script>
-</body>
-    </html>
-    
+            prize_amount: prize.am
