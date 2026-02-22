@@ -1,553 +1,660 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <title>Rayzn Oyun Merkezi</title>
+  <meta charset="UTF-8" />
+  <title>RAYZN Oyun Merkezi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <style>
     :root {
-      --bg: #05060a;
-      --card: #111320;
-      --accent: #ffb800;
-      --accent2: #7f5dff;
-      --border-subtle: rgba(255, 255, 255, 0.1);
-      --text-subtle: rgba(255, 255, 255, 0.72);
+      --bg: #050608;
+      --card: #11141a;
+      --card-alt: #171b23;
+      --accent: #ff7a18;
+      --accent2: #ff3e6c;
+      --text: #f5f5f7;
+      --muted: #9ca3af;
     }
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "Roboto", "Segoe UI", sans-serif;
     }
 
     body {
-      margin: 0;
+      background: radial-gradient(circle at top, #1f2933 0, #050608 45%, #020309 100%);
+      color: var(--text);
       min-height: 100vh;
-      background:
-        radial-gradient(circle at top, #222 0, #05060a 50%, #000 100%);
-      color: #fff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 18px 12px 26px;
+      padding: 16px;
     }
 
     .app {
       width: 100%;
-      max-width: 430px;
-    }
-
-    .card {
-      background: radial-gradient(circle at top, #181a28 0, var(--card) 55%);
-      border-radius: 20px;
+      max-width: 420px;
+      background: linear-gradient(145deg, #11141a, #060a11);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
       padding: 18px 16px 20px;
-      border: 1px solid var(--border-subtle);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(255,255,255,0.04);
     }
 
-    .header {
+    .app-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      gap: 8px;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
-    .title {
-      font-size: 20px;
+    .app-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 30%, #ffe082, #ff7043);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 18px rgba(255,160,0,0.6);
+    }
+
+    .app-title {
+      flex: 1;
+    }
+
+    .app-title h1 {
+      font-size: 19px;
       font-weight: 700;
+      letter-spacing: 0.02em;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
-    .badge {
+    .mini-pill {
       font-size: 11px;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.32);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      opacity: 0.8;
     }
 
-    .subtitle {
-      font-size: 13px;
-      color: var(--text-subtle);
-      margin-bottom: 14px;
+    .app-title p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.3;
     }
 
     .tabs {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      margin-bottom: 10px;
+      margin-top: 10px;
+      display: flex;
+      background: #05070b;
+      padding: 3px;
+      border-radius: 999px;
+      position: relative;
+      margin-bottom: 16px;
     }
 
     .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
       border-radius: 999px;
-      padding: 6px 10px;
       font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      border: 1px solid var(--border-subtle);
-      background: rgba(0, 0, 0, 0.2);
+      gap: 6px;
+      color: var(--muted);
       cursor: pointer;
-      opacity: 0.85;
+      user-select: none;
+      transition: all 0.2s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tab span.icon {
+      font-size: 15px;
     }
 
     .tab.active {
-      border-color: rgba(255, 255, 255, 0.6);
-      background: linear-gradient(135deg, rgba(255, 184, 0, 0.16), rgba(127, 93, 255, 0.24));
-      opacity: 1;
-    }
-
-    .screens {
-      margin-top: 4px;
-    }
-
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    .btn {
-      width: 100%;
-      border-radius: 14px;
-      padding: 11px 12px;
-      border: none;
-      cursor: pointer;
-      font-size: 15px;
+      color: #0b0b0f;
       font-weight: 600;
-      margin-top: 10px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: #fff;
-      transition: transform 0.08s ease, box-shadow 0.08s ease,
-        filter 0.08s ease, opacity 0.08s ease;
     }
 
-    .btn:active {
-      transform: translateY(1px) scale(0.99);
-      filter: brightness(0.96);
-      box-shadow: 0 0 0 transparent;
+    .tab-indicator {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      width: 50%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 18px rgba(255,122,24,0.65);
+      transition: transform 0.25s ease;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #ffb800, #ff4b8b);
-      box-shadow: 0 10px 26px rgba(255, 75, 139, 0.45);
+    .tab-indicator.right {
+      transform: translateX(100%);
     }
 
-    .btn-rocket {
-      background: linear-gradient(135deg, #00e5ff, #7f5dff);
-      box-shadow: 0 10px 26px rgba(0, 229, 255, 0.4);
+    .card {
+      background: radial-gradient(circle at top left, #1f2933 0, #0b0e14 50%, #05070b 100%);
+      border-radius: 22px;
+      padding: 16px 14px 14px;
+      border: 1px solid rgba(255,255,255,0.04);
     }
 
-    .status {
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--text-subtle);
-      min-height: 28px;
-    }
-
-    .status strong {
-      color: #fff;
-    }
-
-    .footer {
-      margin-top: 12px;
+    .hint {
       font-size: 11px;
-      color: var(--text-subtle);
+      color: var(--muted);
       text-align: center;
+      margin-bottom: 12px;
+      line-height: 1.4;
     }
 
-    /* ÇARK ALANI */
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* ÇARK */
 
     .wheel-wrapper {
       position: relative;
-      width: 240px;
-      height: 240px;
-      margin: 6px auto 4px;
+      width: 260px;
+      height: 260px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .wheel {
-      position: relative;
-      width: 100%;
-      height: 100%;
+      width: 240px;
+      height: 240px;
       border-radius: 50%;
-      border: 6px solid rgba(255, 255, 255, 0.18);
-      overflow: hidden;
-      background: #111522;
-      transition: transform 4.2s cubic-bezier(0.12, 0.01, 0, 1);
-      box-shadow: 0 0 0 5px #111522, 0 12px 30px rgba(0, 0, 0, 0.9);
-    }
-
-    .wheel-center {
-      position: absolute;
-      width: 74px;
-      height: 74px;
-      border-radius: 50%;
-      background: radial-gradient(circle at top, #fff8e1 0, #ffb800 40%, #cc7a00 100%);
-      border: 3px solid rgba(0, 0, 0, 0.35);
+      border: 10px solid #05070b;
+      background:
+        conic-gradient(
+          #ffb74d 0deg 36deg,
+          #4dd0e1 36deg 72deg,
+          #7e57c2 72deg 108deg,
+          #ff8a65 108deg 144deg,
+          #66bb6a 144deg 180deg,
+          #f06292 180deg 216deg,
+          #42a5f5 216deg 252deg,
+          #ffca28 252deg 288deg,
+          #ab47bc 288deg 324deg,
+          #26c6da 324deg 360deg
+        );
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.9);
-      z-index: 3;
+      position: relative;
+      transition: transform 4s cubic-bezier(0.16, 0.89, 0.32, 1.28);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.75);
     }
 
-    .wheel-slice {
-      position: absolute;
-      width: 50%;
-      height: 50%;
-      top: 50%;
-      left: 50%;
-      transform-origin: 0 0;
-      background: var(--color);
-      transform: rotate(calc(var(--i) * 36deg)) skewY(-54deg);
+    .wheel-center {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at top, #ffffff, #eee, #ccc);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
-      padding-right: 10px;
-      color: #fff;
+      justify-content: center;
+      color: #111;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: center;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.15);
+    }
+
+    .wheel-center span {
+      display: block;
       font-size: 11px;
       font-weight: 600;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    }
-
-    .wheel-slice span {
-      transform: skewY(54deg) rotate(18deg);
-      text-align: right;
+      opacity: 0.6;
     }
 
     .wheel-pointer {
       position: absolute;
-      top: -6px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: -4px;
       width: 0;
       height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-bottom: 26px solid #ffd54f;
-      filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.8));
-      z-index: 4;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-bottom: 28px solid #ffeb3b;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6));
     }
 
-    /* ROKET ALANI */
-
-    .rocket-space {
-      position: relative;
-      margin: 10px auto 4px;
-      width: 100%;
-      max-width: 320px;
-      height: 210px;
-      border-radius: 18px;
-      background: radial-gradient(circle at 20% 0, #27334d 0, #050716 55%, #000 100%);
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.9);
+    .wheel-pointer-base {
+      position: absolute;
+      top: 16px;
+      width: 40px;
+      height: 18px;
+      border-radius: 999px;
+      background: #11141a;
     }
 
-    .stars {
+    .wheel-labels {
       position: absolute;
       inset: 0;
-      background-image:
-        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.25) 0, transparent 40%),
-        radial-gradient(circle at 70% 40%, rgba(255, 255, 255, 0.18) 0, transparent 45%),
-        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.22) 0, transparent 45%);
-      opacity: 0.4;
-      mix-blend-mode: screen;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wheel-labels span {
+      position: absolute;
+      font-size: 11px;
+      font-weight: 600;
+      color: #111;
+      text-shadow: 0 0 3px rgba(255,255,255,0.8);
+    }
+
+    .wheel-labels span.light {
+      color: #fefefe;
+      text-shadow: 0 0 4px rgba(0,0,0,0.8);
+    }
+
+    /* Roket */
+
+    .rocket-area {
+      width: 100%;
+      height: 260px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #020817 0, #050608 50%, #02030a 100%);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
     }
 
     .rocket {
       position: absolute;
+      bottom: 22px;
       left: 50%;
-      bottom: 20px;
       transform: translateX(-50%);
-      font-size: 40px;
-      z-index: 2;
-      transition: transform 1.6s cubic-bezier(0.11, 0.01, 0.11, 1);
-    }
-
-    .rocket.launching {
-      transform: translate(-50%, -140px);
-    }
-
-    .rocket-fire {
-      position: absolute;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      width: 10px;
-      height: 32px;
+      width: 24px;
+      height: 60px;
       border-radius: 999px;
-      background: radial-gradient(circle at 20% 0, #fff 0, #ff9800 40%, #ff3d00 100%);
-      filter: blur(1px);
-      opacity: 0;
-      transition: opacity 0.18s;
-      z-index: 1;
-      animation: flame 0.18s infinite alternate;
+      background: linear-gradient(160deg, #ffffff, #eceff1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px rgba(255,255,255,0.6);
     }
 
-    .rocket.launching + .rocket-fire {
+    .rocket::before {
+      content: "🚀";
+      font-size: 30px;
+    }
+
+    .rocket-flame {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top, #ffeb3b, #ff9800, #f44336);
+      box-shadow: 0 0 20px rgba(255,152,0,0.9);
+      opacity: 0;
+    }
+
+    .rocket-trail {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      height: 110px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0));
+      opacity: 0;
+    }
+
+    .rocket-stars span {
+      position: absolute;
+      font-size: 12px;
+      opacity: 0;
+    }
+
+    .launching .rocket {
+      animation: rocket-fly 2.2s ease-out forwards;
+    }
+
+    .launching .rocket-flame {
+      opacity: 1;
+      animation: flame-pulse 0.15s linear infinite;
+    }
+
+    .launching .rocket-trail {
       opacity: 1;
     }
 
-    @keyframes flame {
-      from {
-        transform: translateX(-50%) scaleY(1);
-      }
-      to {
-        transform: translateX(-50%) scaleY(1.4);
-      }
+    .launching .rocket-stars span {
+      animation: star-pop 2s ease-out forwards;
     }
 
-    .rocket-cloud {
-      position: absolute;
-      width: 100%;
-      height: 60px;
-      bottom: 0;
-      background: radial-gradient(circle at 20% 0, rgba(255, 255, 255, 0.8) 0, transparent 60%),
-        radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.8) 0, transparent 62%),
-        radial-gradient(circle at 80% 0, rgba(255, 255, 255, 0.7) 0, transparent 60%);
-      opacity: 0.56;
-      filter: blur(1px);
-      z-index: 0;
+    @keyframes rocket-fly {
+      0% { transform: translate(-50%, 0); }
+      70% { transform: translate(-50%, -170px); }
+      100% { transform: translate(-50%, -210px); opacity: 0; }
     }
+
+    @keyframes flame-pulse {
+      0% { transform: translateX(-50%) scale(0.8); }
+      50% { transform: translateX(-50%) scale(1.3); }
+      100% { transform: translateX(-50%) scale(0.9); }
+    }
+
+    @keyframes star-pop {
+      0% { opacity: 0; transform: translateY(40px) scale(0.6); }
+      40% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
+    }
+
+    /* Butonlar */
+
+    .btn {
+      width: 100%;
+      border-radius: 999px;
+      padding: 13px 14px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      margin-top: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #111;
+      box-shadow: 0 12px 24px rgba(255,122,24,0.8);
+      transition: transform 0.08s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    }
+
+    .btn:active {
+      transform: translateY(2px) scale(0.99);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
+      filter: brightness(0.95);
+    }
+
+    .btn.disabled {
+      opacity: 0.55;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .btn span.icon {
+      font-size: 18px;
+    }
+
+    .result {
+      margin-top: 8px;
+      font-size: 12px;
+      text-align: center;
+      color: var(--muted);
+      min-height: 30px;
+    }
+
+    .result strong {
+      color: #fff;
+    }
+
+    .legal {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #6b7280;
+      text-align: center;
+      line-height: 1.4;
+    }
+
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="card">
-      <div class="header">
-        <div class="title">
-          🎮 Rayzn Oyun Merkezi
-        </div>
-        <div class="badge">Mini App</div>
-      </div>
-      <div class="subtitle">
-        Her gün 1 oyun hakkın var. Çarkı çevir ya da roketi uçur; sonuç anında Telegram bot bakiyene işlenir.
-      </div>
-
-      <div class="tabs">
-        <button class="tab active" data-target="screen-wheel">🎰 Çark</button>
-        <button class="tab" data-target="screen-rocket">🚀 Roket Uçurma</button>
-      </div>
-
-      <div class="screens">
-        <!-- ÇARK EKRANI -->
-        <div class="screen active" id="screen-wheel">
-          <div class="wheel-wrapper">
-            <div class="wheel-pointer"></div>
-            <div class="wheel" id="wheel">
-              <!-- 10 dilim -->
-              <div class="wheel-slice" style="--i:0;--color:#ff7043;"><span>1 TL</span></div>
-              <div class="wheel-slice" style="--i:1;--color:#ab47bc;"><span>5 TL</span></div>
-              <div class="wheel-slice" style="--i:2;--color:#29b6f6;"><span>10 TL</span></div>
-              <div class="wheel-slice" style="--i:3;--color:#66bb6a;"><span>30 TL</span></div>
-              <div class="wheel-slice" style="--i:4;--color:#ffa726;"><span>50 TL</span></div>
-              <div class="wheel-slice" style="--i:5;--color:#ec407a;"><span>100 TL</span></div>
-              <div class="wheel-slice" style="--i:6;--color:#26c6da;"><span>200 TL</span></div>
-              <div class="wheel-slice" style="--i:7;--color:#9ccc65;"><span>500 TL</span></div>
-              <div class="wheel-slice" style="--i:8;--color:#ffca28;"><span>1.500 TL</span></div>
-              <div class="wheel-slice" style="--i:9;--color:#8d6e63;"><span>2.000 TL</span></div>
-
-              <div class="wheel-center">🎯</div>
-            </div>
-          </div>
-
-          <button id="btnSpin" class="btn btn-primary">
-            🔄 Çarkı Çevir
-          </button>
-
-          <div class="status" id="wheelStatus"></div>
-        </div>
-
-        <!-- ROKET EKRANI -->
-        <div class="screen" id="screen-rocket">
-          <div class="rocket-space">
-            <div class="stars"></div>
-            <div class="rocket" id="rocket">🚀</div>
-            <div class="rocket-fire"></div>
-            <div class="rocket-cloud"></div>
-          </div>
-
-          <button id="btnRocket" class="btn btn-rocket">
-            🚀 Roketi Uçur
-          </button>
-
-          <div class="status" id="rocketStatus"></div>
-        </div>
-      </div>
-
-      <div class="footer">
-        Oyun sonucu, detaylı olarak Telegram bot ekranında gösterilir ve bakiyene otomatik işlenir.
-      </div>
+<div class="app">
+  <div class="app-header">
+    <div class="app-icon">🎮</div>
+    <div class="app-title">
+      <h1>Rayzn Oyun Merkezi <span class="mini-pill">Mini App</span></h1>
+      <p>Her gün 1 oyun hakkın var. Çarkı çevir veya roketi uçur; sonuç anında Telegram bot bakiyene işlenir.</p>
     </div>
   </div>
 
-  <!-- Çark sesi -->
-  <audio id="spinSound"
-    src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Slot_machine_bonus_spin_sound_effect.ogg"
-  ></audio>
+  <div class="tabs">
+    <div class="tab-indicator" id="tabIndicator"></div>
+    <div class="tab active" data-tab="wheel">
+      <span class="icon">🎰</span> Çark
+    </div>
+    <div class="tab" data-tab="rocket">
+      <span class="icon">🚀</span> Roket
+    </div>
+  </div>
 
-  <script>
-    const tg = window.Telegram?.WebApp || null;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
+  <div class="card" id="screenWheel">
+    <p class="hint">
+      🎡 Şans çarkını çevir. Her gün 1 kez oynayabilirsin.<br/>
+      1 TL %99 – 5 TL %1 şans ile hesabına eklenir.
+    </p>
+    <div class="center">
+      <div class="wheel-wrapper">
+        <div class="wheel-pointer"></div>
+        <div class="wheel-pointer-base"></div>
+        <div class="wheel" id="wheel">
+          <div class="wheel-center">
+            <span>ŞANS</span>
+            ÇARKI
+          </div>
+          <div class="wheel-labels" id="wheelLabels"></div>
+        </div>
+      </div>
 
-    function safeSend(payload) {
-      try {
-        if (tg) {
-          tg.sendData(JSON.stringify(payload));
-        }
-      } catch (e) {
-        console.error("sendData error:", e);
+      <button class="btn" id="btnSpin">
+        <span class="icon">🎰</span>
+        Çarkı Çevir
+      </button>
+
+      <div class="result" id="wheelResult"></div>
+    </div>
+    <p class="legal">
+      Oyun sonucu, detaylı şekilde Telegram bot ekranında gösterilir ve bakiyene otomatik işlenir.
+    </p>
+  </div>
+
+  <div class="card" id="screenRocket" style="display:none;">
+    <p class="hint">
+      🚀 Roketi fırlat, ödül patlamasını izle!<br/>
+      Sonuç yine doğrudan Telegram bot bakiyene işlenir.
+    </p>
+    <div class="center">
+      <div class="rocket-area" id="rocketArea">
+        <div class="rocket"></div>
+        <div class="rocket-flame"></div>
+        <div class="rocket-trail"></div>
+        <div class="rocket-stars">
+          <span style="left: 15%; top: 30%;">💎</span>
+          <span style="left: 70%; top: 40%;">💵</span>
+          <span style="left: 30%; top: 15%;">⭐</span>
+          <span style="left: 80%; top: 20%;">🏆</span>
+        </div>
+      </div>
+
+      <button class="btn" id="btnRocket">
+        <span class="icon">🚀</span>
+        Roketi Uçur
+      </button>
+
+      <div class="result" id="rocketResult"></div>
+    </div>
+    <p class="legal">
+      Roket sonucu, Telegram bot tarafından mesaj olarak gönderilir ve kazandığın tutar bakiyene eklenir.
+    </p>
+  </div>
+</div>
+
+<script>
+  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  // Tablar
+  const tabs = document.querySelectorAll('.tab');
+  const tabIndicator = document.getElementById('tabIndicator');
+  const screenWheel = document.getElementById('screenWheel');
+  const screenRocket = document.getElementById('screenRocket');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (tab.classList.contains('active')) return;
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const name = tab.getAttribute('data-tab');
+      if (name === 'wheel') {
+        tabIndicator.classList.remove('right');
+        screenWheel.style.display = 'block';
+        screenRocket.style.display = 'none';
+      } else {
+        tabIndicator.classList.add('right');
+        screenWheel.style.display = 'none';
+        screenRocket.style.display = 'block';
       }
-    }
-
-    const tabs = document.querySelectorAll(".tab");
-    const screens = document.querySelectorAll(".screen");
-
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        tabs.forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-
-        const targetId = tab.getAttribute("data-target");
-        screens.forEach((s) => {
-          s.classList.toggle("active", s.id === targetId);
-        });
-      });
     });
+  });
 
-    // ==== ÇARK LOGİĞİ ====
-    const wheelPrizes = [
-      { label: "1 TL", amount: 1 },
-      { label: "5 TL", amount: 5 },
-      { label: "10 TL", amount: 10 },
-      { label: "30 TL", amount: 30 },
-      { label: "50 TL", amount: 50 },
-      { label: "100 TL", amount: 100 },
-      { label: "200 TL", amount: 200 },
-      { label: "500 TL", amount: 500 },
-      { label: "1.500 TL", amount: 1500 },
-      { label: "2.000 TL", amount: 2000 }
-    ];
-    // 1 TL %99, 5 TL %1, diğerleri 0
-    function chooseWheelIndex() {
-      const r = Math.random();
-      if (r < 0.99) return 0; // 1 TL
-      return 1;               // 5 TL
-    }
+  // Çark verileri (sadece görsel)
+  const DISPLAY_PRIZES = [
+    "💰 1 TL",
+    "🎁 5 TL",
+    "💎 10 TL",
+    "🔥 30 TL",
+    "⭐ 50 TL",
+    "🌟 100 TL",
+    "💵 200 TL",
+    "💎 500 TL",
+    "👑 1.500 TL",
+    "🏆 2.000 TL"
+  ];
 
-    const wheel = document.getElementById("wheel");
-    const btnSpin = document.getElementById("btnSpin");
-    const wheelStatus = document.getElementById("wheelStatus");
-    const spinSound = document.getElementById("spinSound");
+  const wheel = document.getElementById('wheel');
+  const wheelLabels = document.getElementById('wheelLabels');
+  const btnSpin = document.getElementById('btnSpin');
+  const wheelResult = document.getElementById('wheelResult');
 
-    let spinning = false;
+  let spinning = false;
+  let currentRotation = 0;
 
-    function spinWheel() {
-      if (spinning) return;
-      spinning = true;
-      btnSpin.disabled = true;
-      btnSpin.style.opacity = "0.7";
-      wheelStatus.innerHTML = "🎰 Çark dönüyor...";
+  // Etiketleri çarkın üzerine yerleştir
+  const total = DISPLAY_PRIZES.length;
+  const stepAngle = 360 / total;
 
-      try {
-        spinSound.currentTime = 0;
-        spinSound.play().catch(() => {});
-      } catch (e) {}
+  DISPLAY_PRIZES.forEach((text, index) => {
+    const angleDeg = stepAngle * index + stepAngle / 2;
+    const rad = (angleDeg - 90) * Math.PI / 180;
+    const radius = 90;
 
-      const index = chooseWheelIndex();
-      const segmentAngle = 360 / wheelPrizes.length;
-      const fullTurns = 5 + Math.floor(Math.random() * 3); // 5–7 tur
-      const sliceCenter = index * segmentAngle + segmentAngle / 2;
-      const finalRotation = fullTurns * 360 + (360 - sliceCenter);
+    const span = document.createElement('span');
+    span.textContent = text;
+    if (index % 2 === 1) span.classList.add('light');
+    span.style.left = (50 + Math.cos(rad) * radius) + "%";
+    span.style.top = (50 + Math.sin(rad) * radius) + "%";
+    span.style.transform = `translate(-50%, -50%) rotate(${angleDeg}deg)`;
+    wheelLabels.appendChild(span);
+  });
 
-      wheel.style.transform = `rotate(${finalRotation}deg)`;
+  // Basit tıkırtı sesi (Web Audio)
+  let audioCtx = null;
+  function playTick() {
+    try {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AC();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {}
+  }
 
-      const onDone = () => {
-        wheel.removeEventListener("transitionend", onDone);
-        spinning = false;
-        btnSpin.disabled = false;
-        btnSpin.style.opacity = "1";
+  function sendResult(action, displayLabel) {
+    if (!tg) return;
+    const payload = {
+      action: action,      // "spin" veya "rocket"
+      game: action === 'spin' ? 'wheel' : 'rocket',
+      display_label: displayLabel
+    };
+    tg.sendData(JSON.stringify(payload));
+  }
 
-        const prize = wheelPrizes[index];
-        wheelStatus.innerHTML =
-          `🎯 <strong>Çark sonucu:</strong> <strong>${prize.label}</strong><br>` +
-          `💰 Kazancın bot bakiyene işleniyor.`;
+  btnSpin.addEventListener('click', () => {
+    if (spinning) return;
+    spinning = true;
+    btnSpin.classList.add('disabled');
+    wheelResult.textContent = "Çark dönüyor...";
 
-        safeSend({
-          action: "spin",
-          game: "wheel",
-          win_amount: prize.amount,
-          label: prize.label
-        });
-      };
+    const index = Math.floor(Math.random() * DISPLAY_PRIZES.length);
+    const stopAngle = 360 - (index * stepAngle + stepAngle / 2);
+    const extraTurns = 4 + Math.floor(Math.random() * 2);
 
-      wheel.addEventListener("transitionend", onDone);
-    }
+    currentRotation += extraTurns * 360 + stopAngle;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-    btnSpin.addEventListener("click", spinWheel);
+    const tickInterval = setInterval(playTick, 120);
 
-    // ==== ROKET LOGİĞİ ====
-    const rocket = document.getElementById("rocket");
-    const btnRocket = document.getElementById("btnRocket");
-    const rocketStatus = document.getElementById("rocketStatus");
-    let rocketRunning = false;
+    setTimeout(() => {
+      clearInterval(tickInterval);
+      const label = DISPLAY_PRIZES[index];
+      wheelResult.innerHTML = `Çark sonucu: <strong>${label}</strong><br/>Kazancın Telegram bot mesajında gösterilecek.`;
+      sendResult("spin", label);
+      spinning = false;
+      btnSpin.classList.remove('disabled');
+    }, 4200);
+  });
 
-    function launchRocket() {
-      if (rocketRunning) return;
-      rocketRunning = true;
+  // Roket
+  const rocketArea = document.getElementById('rocketArea');
+  const btnRocket = document.getElementById('btnRocket');
+  const rocketResult = document.getElementById('rocketResult');
 
-      rocketStatus.innerHTML = "🚀 Roket havalanıyor, ödül hazırlanıyor...";
-      btnRocket.disabled = true;
-      btnRocket.style.opacity = "0.7";
+  btnRocket.addEventListener('click', () => {
+    if (rocketArea.classList.contains('launching')) return;
 
-      rocket.classList.add("launching");
+    rocketResult.textContent = "Roket fırlatılıyor...";
+    rocketArea.classList.add('launching');
 
-      setTimeout(() => {
-        rocket.classList.remove("launching");
+    // Görsel etki için rastgele bir label seçelim (gerçek ödül server'dan)
+    const label = DISPLAY_PRIZES[Math.floor(Math.random() * DISPLAY_PRIZES.length)];
 
-        const r = Math.random();
-        const reward = r < 0.99 ? 1 : 5; // %99 1 TL, %1 5 TL
-
-        rocketStatus.innerHTML =
-          `🎆 <strong>Roket ödülü:</strong> <strong>${reward} TL</strong><br>` +
-          `💳 Bu tutar hemen bot bakiyene ekleniyor.`;
-
-        safeSend({
-          action: "spin",
-          game: "rocket",
-          win_amount: reward
-        });
-
-        rocketRunning = false;
-        btnRocket.disabled = false;
-        btnRocket.style.opacity = "1";
-      }, 1700);
-    }
-
-    btnRocket.addEventListener("click", launchRocket);
-  </script>
+    setTimeout(() => {
+      rocketArea.classList.remove('launching');
+      rocketResult.innerHTML = `Roket patlaması: <strong>${label}</strong><br/>Gerçek kazancın Telegram bot mesajında.`;
+      sendResult("rocket", label);
+    }, 2300);
+  });
+</script>
 </body>
-                </html>
+</html>
