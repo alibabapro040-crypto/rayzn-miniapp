@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rayzn Oyun Merkezi</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background: radial-gradient(circle at top,#111,#000);
+color:white;
+text-align:center;
+}
+.container{
+max-width:420px;
+margin:auto;
+padding:20px;
+}
+.card{
+background:#0f0f18;
+padding:20px;
+border-radius:20px;
+box-shadow:0 0 25px #000;
+margin-top:20px;
+}
+h1{
+margin:0 0 10px 0;
+}
+.btn{
+padding:12px;
+margin:10px 0;
+border:none;
+border-radius:15px;
+font-size:16px;
+cursor:pointer;
+width:100%;
+font-weight:bold;
+}
+.wheel{background:linear-gradient(45deg,#ff9800,#ff3d00);}
+.rocket{background:linear-gradient(45deg,#7f5dff,#00e5ff);}
+.cash{background:linear-gradient(45deg,#4caf50,#00c853);}
+.multiplier{
+font-size:32px;
+margin:20px 0;
+font-weight:bold;
+}
+.status{
+min-height:30px;
+font-size:14px;
+opacity:0.8;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<div class="card">
+<h1>🎮 Rayzn Oyun Merkezi</h1>
+
+<button class="btn wheel" onclick="playWheel()">🎰 Şans Çarkı</button>
+<button class="btn rocket" onclick="startRocket()">🚀 Roket Oyunu</button>
+
+<div id="rocketArea" style="display:none;">
+<div class="multiplier" id="multiplier">1.00x</div>
+<button class="btn cash" onclick="cashOut()">💰 Sat (Cashout)</button>
+</div>
+
+<div class="status" id="status"></div>
+</div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+let rocketRunning=false;
+let currentMultiplier=1.00;
+let crashPoint=0;
+let interval=null;
+
+function setStatus(text){
+document.getElementById("status").innerHTML=text;
+}
+
+function playWheel(){
+setStatus("🎰 Çark çevriliyor...");
+setTimeout(()=>{
+tg.sendData(JSON.stringify({
+action:"spin",
+game:"wheel"
+}));
+setStatus("✅ Sonuç bot üzerinden bildirilecek.");
+},1500);
+}
+
+function startRocket(){
+if(rocketRunning) return;
+
+rocketRunning=true;
+currentMultiplier=1.00;
+crashPoint=(Math.random()*4)+1.5;
+document.getElementById("rocketArea").style.display="block";
+setStatus("🚀 Roket yükseliyor... Patlamadan sat!");
+
+interval=setInterval(()=>{
+currentMultiplier+=0.03;
+document.getElementById("multiplier").innerText=currentMultiplier.toFixed(2)+"x";
+
+if(currentMultiplier>=crashPoint){
+clearInterval(interval);
+rocketRunning=false;
+document.getElementById("multiplier").innerText="💥 PATLADI!";
+setStatus("Roket patladı! Kazanç yok.");
+tg.sendData(JSON.stringify({
+action:"spin",
+game:"rocket",
+win_amount:0
+}));
+}
+},100);
+}
+
+function cashOut(){
+if(!rocketRunning) return;
+
+clearInterval(interval);
+rocketRunning=false;
+
+let win=Math.floor(currentMultiplier*20);
+setStatus("💰 "+win+" TL kazandın! Bot bakiyene gönderiliyor.");
+
+tg.sendData(JSON.stringify({
+action:"spin",
+game:"rocket",
+win_amount:win
+}));
+
+document.getElementById("multiplier").innerText="✔️ Satıldı!";
+}
+</script>
+</body>
+</html>
