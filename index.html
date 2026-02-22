@@ -1,660 +1,379 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>RAYZN Oyun Merkezi</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #050608;
-      --card: #11141a;
-      --card-alt: #171b23;
-      --accent: #ff7a18;
-      --accent2: #ff3e6c;
-      --text: #f5f5f7;
-      --muted: #9ca3af;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-      "Roboto", "Segoe UI", sans-serif;
-    }
-
-    body {
-      background: radial-gradient(circle at top, #1f2933 0, #050608 45%, #020309 100%);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 420px;
-      background: linear-gradient(145deg, #11141a, #060a11);
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
-      padding: 18px 16px 20px;
-      border: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .app-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .app-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
-      background: radial-gradient(circle at 30% 30%, #ffe082, #ff7043);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 0 18px rgba(255,160,0,0.6);
-    }
-
-    .app-title {
-      flex: 1;
-    }
-
-    .app-title h1 {
-      font-size: 19px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .mini-pill {
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.15);
-      text-transform: uppercase;
-    }
-
-    .app-title p {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 3px;
-      line-height: 1.3;
-    }
-
-    .tabs {
-      margin-top: 10px;
-      display: flex;
-      background: #05070b;
-      padding: 3px;
-      border-radius: 999px;
-      position: relative;
-      margin-bottom: 16px;
-    }
-
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 8px 0;
-      border-radius: 999px;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      color: var(--muted);
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s ease;
-      position: relative;
-      z-index: 1;
-    }
-
-    .tab span.icon {
-      font-size: 15px;
-    }
-
-    .tab.active {
-      color: #0b0b0f;
-      font-weight: 600;
-    }
-
-    .tab-indicator {
-      position: absolute;
-      top: 3px;
-      bottom: 3px;
-      width: 50%;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 0 18px rgba(255,122,24,0.65);
-      transition: transform 0.25s ease;
-    }
-
-    .tab-indicator.right {
-      transform: translateX(100%);
-    }
-
-    .card {
-      background: radial-gradient(circle at top left, #1f2933 0, #0b0e14 50%, #05070b 100%);
-      border-radius: 22px;
-      padding: 16px 14px 14px;
-      border: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .hint {
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      margin-bottom: 12px;
-      line-height: 1.4;
-    }
-
-    .center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    /* ÇARK */
-
-    .wheel-wrapper {
-      position: relative;
-      width: 260px;
-      height: 260px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .wheel {
-      width: 240px;
-      height: 240px;
-      border-radius: 50%;
-      border: 10px solid #05070b;
-      background:
-        conic-gradient(
-          #ffb74d 0deg 36deg,
-          #4dd0e1 36deg 72deg,
-          #7e57c2 72deg 108deg,
-          #ff8a65 108deg 144deg,
-          #66bb6a 144deg 180deg,
-          #f06292 180deg 216deg,
-          #42a5f5 216deg 252deg,
-          #ffca28 252deg 288deg,
-          #ab47bc 288deg 324deg,
-          #26c6da 324deg 360deg
-        );
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      transition: transform 4s cubic-bezier(0.16, 0.89, 0.32, 1.28);
-      box-shadow: 0 16px 36px rgba(0,0,0,0.75);
-    }
-
-    .wheel-center {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: radial-gradient(circle at top, #ffffff, #eee, #ccc);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #111;
-      font-weight: 700;
-      font-size: 13px;
-      text-align: center;
-      box-shadow: 0 0 0 4px rgba(0,0,0,0.15);
-    }
-
-    .wheel-center span {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      opacity: 0.6;
-    }
-
-    .wheel-pointer {
-      position: absolute;
-      top: -4px;
-      width: 0;
-      height: 0;
-      border-left: 16px solid transparent;
-      border-right: 16px solid transparent;
-      border-bottom: 28px solid #ffeb3b;
-      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6));
-    }
-
-    .wheel-pointer-base {
-      position: absolute;
-      top: 16px;
-      width: 40px;
-      height: 18px;
-      border-radius: 999px;
-      background: #11141a;
-    }
-
-    .wheel-labels {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .wheel-labels span {
-      position: absolute;
-      font-size: 11px;
-      font-weight: 600;
-      color: #111;
-      text-shadow: 0 0 3px rgba(255,255,255,0.8);
-    }
-
-    .wheel-labels span.light {
-      color: #fefefe;
-      text-shadow: 0 0 4px rgba(0,0,0,0.8);
-    }
-
-    /* Roket */
-
-    .rocket-area {
-      width: 100%;
-      height: 260px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #020817 0, #050608 50%, #02030a 100%);
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-    }
-
-    .rocket {
-      position: absolute;
-      bottom: 22px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 24px;
-      height: 60px;
-      border-radius: 999px;
-      background: linear-gradient(160deg, #ffffff, #eceff1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 18px rgba(255,255,255,0.6);
-    }
-
-    .rocket::before {
-      content: "🚀";
-      font-size: 30px;
-    }
-
-    .rocket-flame {
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 20px;
-      height: 20px;
-      border-radius: 999px;
-      background: radial-gradient(circle at top, #ffeb3b, #ff9800, #f44336);
-      box-shadow: 0 0 20px rgba(255,152,0,0.9);
-      opacity: 0;
-    }
-
-    .rocket-trail {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 4px;
-      height: 110px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0));
-      opacity: 0;
-    }
-
-    .rocket-stars span {
-      position: absolute;
-      font-size: 12px;
-      opacity: 0;
-    }
-
-    .launching .rocket {
-      animation: rocket-fly 2.2s ease-out forwards;
-    }
-
-    .launching .rocket-flame {
-      opacity: 1;
-      animation: flame-pulse 0.15s linear infinite;
-    }
-
-    .launching .rocket-trail {
-      opacity: 1;
-    }
-
-    .launching .rocket-stars span {
-      animation: star-pop 2s ease-out forwards;
-    }
-
-    @keyframes rocket-fly {
-      0% { transform: translate(-50%, 0); }
-      70% { transform: translate(-50%, -170px); }
-      100% { transform: translate(-50%, -210px); opacity: 0; }
-    }
-
-    @keyframes flame-pulse {
-      0% { transform: translateX(-50%) scale(0.8); }
-      50% { transform: translateX(-50%) scale(1.3); }
-      100% { transform: translateX(-50%) scale(0.9); }
-    }
-
-    @keyframes star-pop {
-      0% { opacity: 0; transform: translateY(40px) scale(0.6); }
-      40% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
-    }
-
-    /* Butonlar */
-
-    .btn {
-      width: 100%;
-      border-radius: 999px;
-      padding: 13px 14px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      margin-top: 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #111;
-      box-shadow: 0 12px 24px rgba(255,122,24,0.8);
-      transition: transform 0.08s ease, box-shadow 0.1s ease, filter 0.1s ease;
-    }
-
-    .btn:active {
-      transform: translateY(2px) scale(0.99);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
-      filter: brightness(0.95);
-    }
-
-    .btn.disabled {
-      opacity: 0.55;
-      cursor: default;
-      box-shadow: none;
-    }
-
-    .btn span.icon {
-      font-size: 18px;
-    }
-
-    .result {
-      margin-top: 8px;
-      font-size: 12px;
-      text-align: center;
-      color: var(--muted);
-      min-height: 30px;
-    }
-
-    .result strong {
-      color: #fff;
-    }
-
-    .legal {
-      margin-top: 8px;
-      font-size: 10px;
-      color: #6b7280;
-      text-align: center;
-      line-height: 1.4;
-    }
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎡 RAYZN Şans Çarkı</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow-x: hidden;
+            padding: 15px 10px 30px;
+        }
+        .header { text-align: center; margin-bottom: 8px; }
+        .header h1 {
+            font-size: 1.6em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+        .header .subtitle { font-size: 0.82em; color: #aaa; margin-top: 3px; }
+        .wheel-wrapper {
+            position: relative;
+            width: 310px;
+            height: 310px;
+            margin: 5px auto 10px;
+        }
+        .pointer {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            filter: drop-shadow(0 2px 6px rgba(255,215,0,0.8));
+        }
+        #wheel-canvas {
+            border-radius: 50%;
+            box-shadow: 0 0 0 5px rgba(255,215,0,0.3), 0 0 30px rgba(255,215,0,0.4), 0 0 60px rgba(255,165,0,0.2);
+            display: block;
+        }
+        .center-hub {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fff9c4, #FFD700, #e65c00);
+            border: 3px solid rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            z-index: 15;
+            box-shadow: 0 0 20px rgba(255,215,0,0.9), inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        .wheel-ring {
+            position: absolute;
+            top: 0; left: 0;
+            width: 310px; height: 310px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: ringPulse 2s ease-in-out infinite;
+        }
+        @keyframes ringPulse {
+            0%,100%{ box-shadow: 0 0 0 3px rgba(255,215,0,0.2), 0 0 25px rgba(255,215,0,0.15); }
+            50%    { box-shadow: 0 0 0 3px rgba(255,215,0,0.5), 0 0 40px rgba(255,215,0,0.35); }
+        }
+        .spinning-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0;
+            width: 310px; height: 310px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: rgba(255,215,0,0.8);
+            animation: spinRing 0.6s linear infinite;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .spinning-overlay.active { display: block; }
+        @keyframes spinRing { to { transform: rotate(360deg); } }
+        #spin-btn {
+            position: relative;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B00 100%);
+            color: #1a0a00;
+            border: none;
+            padding: 14px 44px;
+            font-size: 1.15em;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 20px rgba(255,165,0,0.5), 0 2px 6px rgba(0,0,0,0.4);
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        #spin-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 40%; height: 200%;
+            background: rgba(255,255,255,0.25);
+            transform: skewX(-20deg);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        @keyframes shimmer { 0%,100%{ left:-60%; } 50%{ left:120%; } }
+        #spin-btn:not(:disabled):hover { transform: scale(1.05); box-shadow: 0 6px 28px rgba(255,165,0,0.7); }
+        #spin-btn:not(:disabled):active { transform: scale(0.98); }
+        #spin-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+        @keyframes btnGlow {
+            0%,100%{ box-shadow: 0 4px 20px rgba(255,165,0,0.5), 0 2px 6px rgba(0,0,0,0.4); }
+            50%    { box-shadow: 0 4px 35px rgba(255,165,0,0.85), 0 2px 6px rgba(0,0,0,0.4); }
+        }
+        #spin-btn.idle { animation: btnGlow 2s ease-in-out infinite; }
+        #result-box {
+            display: none;
+            background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,165,0,0.05));
+            border: 2px solid rgba(255,215,0,0.6);
+            border-radius: 18px;
+            padding: 18px 24px;
+            text-align: center;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 280px;
+            max-width: 95%;
+        }
+        #result-box.show { display: block; }
+        @keyframes popIn {
+            from { opacity:0; transform:scale(0.6) translateY(20px); }
+            to   { opacity:1; transform:scale(1) translateY(0); }
+        }
+        .result-emoji { font-size: 2.4em; margin-bottom: 4px; }
+        .result-prize {
+            font-size: 1.8em;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.6);
+            margin-bottom: 4px;
+        }
+        .result-added { font-size: 0.88em; color: #ccc; }
+        .result-added strong { color: #7fff7f; }
+        .info-row { font-size: 0.72em; color: #666; margin-top: 8px; text-align: center; }
+        .confetti-piece {
+            position: fixed;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0%  { transform: translateY(-15px) rotate(0deg);   opacity: 1; }
+            100%{ transform: translateY(105vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
 </head>
 <body>
-<div class="app">
-  <div class="app-header">
-    <div class="app-icon">🎮</div>
-    <div class="app-title">
-      <h1>Rayzn Oyun Merkezi <span class="mini-pill">Mini App</span></h1>
-      <p>Her gün 1 oyun hakkın var. Çarkı çevir veya roketi uçur; sonuç anında Telegram bot bakiyene işlenir.</p>
-    </div>
-  </div>
 
-  <div class="tabs">
-    <div class="tab-indicator" id="tabIndicator"></div>
-    <div class="tab active" data-tab="wheel">
-      <span class="icon">🎰</span> Çark
-    </div>
-    <div class="tab" data-tab="rocket">
-      <span class="icon">🚀</span> Roket
-    </div>
-  </div>
-
-  <div class="card" id="screenWheel">
-    <p class="hint">
-      🎡 Şans çarkını çevir. Her gün 1 kez oynayabilirsin.<br/>
-      1 TL %99 – 5 TL %1 şans ile hesabına eklenir.
-    </p>
-    <div class="center">
-      <div class="wheel-wrapper">
-        <div class="wheel-pointer"></div>
-        <div class="wheel-pointer-base"></div>
-        <div class="wheel" id="wheel">
-          <div class="wheel-center">
-            <span>ŞANS</span>
-            ÇARKI
-          </div>
-          <div class="wheel-labels" id="wheelLabels"></div>
-        </div>
-      </div>
-
-      <button class="btn" id="btnSpin">
-        <span class="icon">🎰</span>
-        Çarkı Çevir
-      </button>
-
-      <div class="result" id="wheelResult"></div>
-    </div>
-    <p class="legal">
-      Oyun sonucu, detaylı şekilde Telegram bot ekranında gösterilir ve bakiyene otomatik işlenir.
-    </p>
-  </div>
-
-  <div class="card" id="screenRocket" style="display:none;">
-    <p class="hint">
-      🚀 Roketi fırlat, ödül patlamasını izle!<br/>
-      Sonuç yine doğrudan Telegram bot bakiyene işlenir.
-    </p>
-    <div class="center">
-      <div class="rocket-area" id="rocketArea">
-        <div class="rocket"></div>
-        <div class="rocket-flame"></div>
-        <div class="rocket-trail"></div>
-        <div class="rocket-stars">
-          <span style="left: 15%; top: 30%;">💎</span>
-          <span style="left: 70%; top: 40%;">💵</span>
-          <span style="left: 30%; top: 15%;">⭐</span>
-          <span style="left: 80%; top: 20%;">🏆</span>
-        </div>
-      </div>
-
-      <button class="btn" id="btnRocket">
-        <span class="icon">🚀</span>
-        Roketi Uçur
-      </button>
-
-      <div class="result" id="rocketResult"></div>
-    </div>
-    <p class="legal">
-      Roket sonucu, Telegram bot tarafından mesaj olarak gönderilir ve kazandığın tutar bakiyene eklenir.
-    </p>
-  </div>
+<div class="header">
+    <h1>🎡 ŞANS ÇARKI</h1>
+    <p class="subtitle">✨ Bugünkü şansını dene!</p>
 </div>
 
+<div class="wheel-wrapper">
+    <svg class="pointer" width="30" height="36" viewBox="0 0 30 36">
+        <polygon points="15,2 28,34 2,34" fill="#FFD700" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+    </svg>
+    <div class="wheel-ring"></div>
+    <canvas id="wheel-canvas" width="310" height="310"></canvas>
+    <div class="spinning-overlay" id="spinning-ring"></div>
+    <div class="center-hub">🎰</div>
+</div>
+
+<button id="spin-btn" class="idle" onclick="startSpin()">🎰 ÇARKI ÇEVİR</button>
+
+<div id="result-box">
+    <div class="result-emoji" id="result-emoji">🎉</div>
+    <div class="result-prize" id="result-prize">5 TL</div>
+    <div class="result-added">Ödülünüz: <strong id="result-amount">5 TL</strong> bakiyenize ekleniyor...</div>
+</div>
+
+<p class="info-row">🍀 Her gün 1 kez çevirebilirsiniz</p>
+
 <script>
-  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-  if (tg) {
-    tg.ready();
-    tg.expand();
-  }
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+tg.setHeaderColor('#0f0c29');
+tg.setBackgroundColor('#0f0c29');
 
-  // Tablar
-  const tabs = document.querySelectorAll('.tab');
-  const tabIndicator = document.getElementById('tabIndicator');
-  const screenWheel = document.getElementById('screenWheel');
-  const screenRocket = document.getElementById('screenRocket');
+const params = new URLSearchParams(window.location.search);
+const TOKEN       = params.get('token')        || '';
+const PRIZE_IDX   = parseInt(params.get('prize_idx')    ?? '0');
+const PRIZE_LABEL = decodeURIComponent(params.get('prize_label')  || '1 TL');
+const PRIZE_AMOUNT= parseInt(params.get('prize_amount') ?? '1');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      if (tab.classList.contains('active')) return;
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+// 10 görsel ödül (çark dilimleri)
+const SEGMENTS = [
+    { label:"1 TL",      emoji:"💰", bg:"#C0392B", light:"#E74C3C" },
+    { label:"5 TL",      emoji:"🎁", bg:"#1E8449", light:"#27AE60" },
+    { label:"10 TL",     emoji:"💎", bg:"#1A5276", light:"#2980B9" },
+    { label:"30 TL",     emoji:"🔥", bg:"#BA4A00", light:"#E67E22" },
+    { label:"50 TL",     emoji:"⭐", bg:"#6C3483", light:"#8E44AD" },
+    { label:"100 TL",    emoji:"🌟", bg:"#B7770D", light:"#F39C12" },
+    { label:"200 TL",    emoji:"💵", bg:"#148F77", light:"#1ABC9C" },
+    { label:"500 TL",    emoji:"💎", bg:"#7B241C", light:"#C0392B" },
+    { label:"1.500 TL",  emoji:"👑", bg:"#5B2C6F", light:"#7D3C98" },
+    { label:"2.000 TL",  emoji:"🏆", bg:"#9A7D0A", light:"#D4AC0D" },
+];
 
-      const name = tab.getAttribute('data-tab');
-      if (name === 'wheel') {
-        tabIndicator.classList.remove('right');
-        screenWheel.style.display = 'block';
-        screenRocket.style.display = 'none';
-      } else {
-        tabIndicator.classList.add('right');
-        screenWheel.style.display = 'none';
-        screenRocket.style.display = 'block';
-      }
-    });
-  });
+const N = SEGMENTS.length;
+const ARC = (2 * Math.PI) / N;
+const canvas = document.getElementById('wheel-canvas');
+const ctx = canvas.getContext('2d');
+const SIZE = 310, CX = SIZE / 2, CY = SIZE / 2, RADIUS = CX - 6;
 
-  // Çark verileri (sadece görsel)
-  const DISPLAY_PRIZES = [
-    "💰 1 TL",
-    "🎁 5 TL",
-    "💎 10 TL",
-    "🔥 30 TL",
-    "⭐ 50 TL",
-    "🌟 100 TL",
-    "💵 200 TL",
-    "💎 500 TL",
-    "👑 1.500 TL",
-    "🏆 2.000 TL"
-  ];
+let currentAngle = -Math.PI / 2;
+let isSpinning = false;
+let spinDone = false;
 
-  const wheel = document.getElementById('wheel');
-  const wheelLabels = document.getElementById('wheelLabels');
-  const btnSpin = document.getElementById('btnSpin');
-  const wheelResult = document.getElementById('wheelResult');
+function drawWheel(rot) {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    for (let i = 0; i < N; i++) {
+        const seg = SEGMENTS[i];
+        const startA = rot + i * ARC;
+        const endA   = startA + ARC;
+        const midA   = startA + ARC / 2;
 
-  let spinning = false;
-  let currentRotation = 0;
+        ctx.beginPath();
+        ctx.moveTo(CX, CY);
+        ctx.arc(CX, CY, RADIUS, startA, endA);
+        ctx.closePath();
 
-  // Etiketleri çarkın üzerine yerleştir
-  const total = DISPLAY_PRIZES.length;
-  const stepAngle = 360 / total;
+        const grd = ctx.createLinearGradient(
+            CX + Math.cos(midA)*20, CY + Math.sin(midA)*20,
+            CX + Math.cos(midA)*RADIUS, CY + Math.sin(midA)*RADIUS
+        );
+        grd.addColorStop(0, seg.light);
+        grd.addColorStop(1, seg.bg);
+        ctx.fillStyle = grd;
+        ctx.fill();
 
-  DISPLAY_PRIZES.forEach((text, index) => {
-    const angleDeg = stepAngle * index + stepAngle / 2;
-    const rad = (angleDeg - 90) * Math.PI / 180;
-    const radius = 90;
+        ctx.beginPath();
+        ctx.moveTo(CX, CY);
+        ctx.lineTo(CX + Math.cos(startA)*RADIUS, CY + Math.sin(startA)*RADIUS);
+        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-    const span = document.createElement('span');
-    span.textContent = text;
-    if (index % 2 === 1) span.classList.add('light');
-    span.style.left = (50 + Math.cos(rad) * radius) + "%";
-    span.style.top = (50 + Math.sin(rad) * radius) + "%";
-    span.style.transform = `translate(-50%, -50%) rotate(${angleDeg}deg)`;
-    wheelLabels.appendChild(span);
-  });
+        ctx.save();
+        ctx.translate(CX, CY);
+        ctx.rotate(midA);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = 4;
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(seg.label, RADIUS - 6, 4);
+        ctx.font = '12px serif';
+        ctx.fillText(seg.emoji, RADIUS - 6 - ctx.measureText(seg.label).width - 3, 4);
+        ctx.shadowBlur = 0;
+        ctx.restore();
+    }
 
-  // Basit tıkırtı sesi (Web Audio)
-  let audioCtx = null;
-  function playTick() {
-    try {
-      if (!audioCtx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AC();
-      }
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(900, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.1);
-    } catch (e) {}
-  }
+    // Gold outer ring
+    ctx.beginPath();
+    ctx.arc(CX, CY, RADIUS, 0, 2*Math.PI);
+    ctx.strokeStyle = 'rgba(255,215,0,0.75)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
 
-  function sendResult(action, displayLabel) {
-    if (!tg) return;
-    const payload = {
-      action: action,      // "spin" veya "rocket"
-      game: action === 'spin' ? 'wheel' : 'rocket',
-      display_label: displayLabel
-    };
-    tg.sendData(JSON.stringify(payload));
-  }
+    // Hub shadow
+    ctx.beginPath();
+    ctx.arc(CX, CY, 28, 0, 2*Math.PI);
+    const hgrd = ctx.createRadialGradient(CX, CY, 0, CX, CY, 28);
+    hgrd.addColorStop(0, 'rgba(30,20,0,0.7)');
+    hgrd.addColorStop(1, 'rgba(0,0,0,0.5)');
+    ctx.fillStyle = hgrd;
+    ctx.fill();
+}
 
-  btnSpin.addEventListener('click', () => {
-    if (spinning) return;
-    spinning = true;
-    btnSpin.classList.add('disabled');
-    wheelResult.textContent = "Çark dönüyor...";
+drawWheel(currentAngle);
 
-    const index = Math.floor(Math.random() * DISPLAY_PRIZES.length);
-    const stopAngle = 360 - (index * stepAngle + stepAngle / 2);
-    const extraTurns = 4 + Math.floor(Math.random() * 2);
+function startSpin() {
+    if (isSpinning || spinDone) return;
+    isSpinning = true;
 
-    currentRotation += extraTurns * 360 + stopAngle;
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    const btn = document.getElementById('spin-btn');
+    btn.disabled = true;
+    btn.classList.remove('idle');
+    btn.textContent = '🌀 Dönüyor...';
+    document.getElementById('spinning-ring').classList.add('active');
 
-    const tickInterval = setInterval(playTick, 120);
+    try { tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+
+    // Hedef: PRIZE_IDX dilimi işaretçinin (üst = -PI/2) altına gelsin
+    const safeOffset = (Math.random() - 0.5) * ARC * 0.42;
+    const targetAngle = (-Math.PI / 2) - PRIZE_IDX * ARC - ARC / 2 + safeOffset;
+    const totalRot = 9 * 2 * Math.PI + (targetAngle - currentAngle);
+
+    const duration  = 5500;
+    const startTime = performance.now();
+    const startAngle = currentAngle;
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function frame(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        currentAngle = startAngle + easeOut(progress) * totalRot;
+        drawWheel(currentAngle);
+        if (progress < 1) {
+            requestAnimationFrame(frame);
+        } else {
+            currentAngle = targetAngle;
+            drawWheel(currentAngle);
+            onSpinComplete();
+        }
+    }
+    requestAnimationFrame(frame);
+}
+
+function onSpinComplete() {
+    isSpinning = false;
+    spinDone   = true;
+    document.getElementById('spinning-ring').classList.remove('active');
+    try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
+
+    const seg = SEGMENTS[PRIZE_IDX];
+    document.getElementById('result-emoji').textContent  = seg.emoji;
+    document.getElementById('result-prize').textContent  = PRIZE_LABEL;
+    document.getElementById('result-amount').textContent = PRIZE_AMOUNT + ' TL';
+    document.getElementById('result-box').classList.add('show');
+    document.getElementById('spin-btn').textContent = '✅ Tamamlandı!';
+
+    spawnConfetti();
 
     setTimeout(() => {
-      clearInterval(tickInterval);
-      const label = DISPLAY_PRIZES[index];
-      wheelResult.innerHTML = `Çark sonucu: <strong>${label}</strong><br/>Kazancın Telegram bot mesajında gösterilecek.`;
-      sendResult("spin", label);
-      spinning = false;
-      btnSpin.classList.remove('disabled');
-    }, 4200);
-  });
+        tg.sendData(JSON.stringify({
+            token:        TOKEN,
+            prize_idx:    PRIZE_IDX,
+            prize_amount: PRIZE_AMOUNT,
+            prize_label:  PRIZE_LABEL
+        }));
+    }, 2200);
+}
 
-  // Roket
-  const rocketArea = document.getElementById('rocketArea');
-  const btnRocket = document.getElementById('btnRocket');
-  const rocketResult = document.getElementById('rocketResult');
-
-  btnRocket.addEventListener('click', () => {
-    if (rocketArea.classList.contains('launching')) return;
-
-    rocketResult.textContent = "Roket fırlatılıyor...";
-    rocketArea.classList.add('launching');
-
-    // Görsel etki için rastgele bir label seçelim (gerçek ödül server'dan)
-    const label = DISPLAY_PRIZES[Math.floor(Math.random() * DISPLAY_PRIZES.length)];
-
-    setTimeout(() => {
-      rocketArea.classList.remove('launching');
-      rocketResult.innerHTML = `Roket patlaması: <strong>${label}</strong><br/>Gerçek kazancın Telegram bot mesajında.`;
-      sendResult("rocket", label);
-    }, 2300);
-  });
+const CONF_COLORS = ['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#C3A6FF','#7fff7f','#FFA07A','#ff69b4'];
+function spawnConfetti() {
+    for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'confetti-piece';
+            el.style.cssText = `
+                left:${Math.random()*100}vw;
+                top:-12px;
+                width:${6+Math.random()*8}px;
+                height:${6+Math.random()*8}px;
+                background:${CONF_COLORS[Math.floor(Math.random()*CONF_COLORS.length)]};
+                border-radius:${Math.random()>0.5?'50%':'2px'};
+                animation-duration:${2.5+Math.random()*2.5}s;
+                animation-delay:${Math.random()*0.6}s;
+            `;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 6000);
+        }, i * 35);
+    }
+}
 </script>
 </body>
 </html>
