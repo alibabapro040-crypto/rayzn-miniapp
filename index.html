@@ -30,6 +30,15 @@
             letter-spacing: 2px;
         }
         .header .subtitle { font-size: 0.82em; color: #aaa; margin-top: 3px; }
+        .uid-display {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 8px 15px;
+            margin: 8px 0;
+            font-size: 0.75em;
+            color: #FFD700;
+        }
         .wheel-wrapper {
             position: relative;
             width: 310px;
@@ -161,6 +170,29 @@
             0%  { transform: translateY(-15px) rotate(0deg);   opacity: 1; }
             100%{ transform: translateY(105vh) rotate(720deg); opacity: 0; }
         }
+        .error-box {
+            display: none;
+            background: rgba(231, 76, 60, 0.15);
+            border: 2px solid rgba(231, 76, 60, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            width: 280px;
+            max-width: 95%;
+        }
+        .error-box.show { display: block; }
+        .error-emoji { font-size: 3em; margin-bottom: 10px; }
+        .error-text { color: #e74c3c; font-size: 1.1em; margin-bottom: 15px; }
+        .error-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -169,6 +201,8 @@
     <h1>🎡 ŞANS ÇARKI</h1>
     <p class="subtitle">✨ Bugünkü şansını dene!</p>
 </div>
+
+<div class="uid-display" id="uid-display">🆔 Kullanıcı ID: <span id="uid-span">-</span></div>
 
 <div class="wheel-wrapper">
     <svg class="pointer" width="30" height="36" viewBox="0 0 30 36">
@@ -188,6 +222,12 @@
     <div class="result-added">Ödülünüz: <strong id="result-amount">5 TL</strong> bakiyenize ekleniyor...</div>
 </div>
 
+<div class="error-box" id="error-box">
+    <div class="error-emoji">⚠️</div>
+    <div class="error-text" id="error-text">Bir hata oluştu!</div>
+    <button class="error-btn" onclick="closeApp()">Kapat</button>
+</div>
+
 <p class="info-row">🍀 Her gün 1 kez çevirebilirsiniz</p>
 
 <script>
@@ -197,13 +237,30 @@ tg.expand();
 tg.setHeaderColor('#0f0c29');
 tg.setBackgroundColor('#0f0c29');
 
+// URL'den parametreleri al
 const params = new URLSearchParams(window.location.search);
-const TOKEN       = params.get('token')        || '';
-const PRIZE_IDX   = parseInt(params.get('prize_idx')    ?? '0');
-const PRIZE_LABEL = decodeURIComponent(params.get('prize_label')  || '1 TL');
-const PRIZE_AMOUNT= parseInt(params.get('prize_amount') ?? '1');
+const USER_UID = params.get('uid') || '';
+const ALREADY_SPUN = params.get('already_spun') === '1';
 
-// 10 görsel ödül (çark dilimleri)
+// UID'yi göster
+document.getElementById('uid-span').textContent = USER_UID || 'Bilinmiyor';
+
+// Eğer zaten çevrilmişse butonu devre dışı bırak
+if (ALREADY_SPUN) {
+    const btn = document.getElementById('spin-btn');
+    btn.disabled = true;
+    btn.textContent = '⏰ Bugün Kullandın';
+    btn.classList.remove('idle');
+}
+
+// GERÇEK ÖDÜLLER (Bot ile aynı olmalı!)
+// Sadece 1 TL ve 5 TL kazanılabilir
+const REAL_PRIZES = [
+    { label: "💰 1 TL", amount: 1, weight: 85 },   // %85 ihtimal
+    { label: "🎁 5 TL", amount: 5, weight: 15 }    // %15 ihtimal
+];
+
+// GÖRSEL ÖDÜLLER (Sadece çarkta gösterilir)
 const SEGMENTS = [
     { label:"1 TL",      emoji:"💰", bg:"#C0392B", light:"#E74C3C" },
     { label:"5 TL",      emoji:"🎁", bg:"#1E8449", light:"#27AE60" },
@@ -288,10 +345,45 @@ function drawWheel(rot) {
     ctx.fill();
 }
 
+// Ağırlıklı rastgele ödül seç
+function selectPrize() {
+    const totalWeight = REAL_PRIZES.reduce((sum, p) => sum + p.weight, 0);
+    let random = Math.random() * totalWeight;
+    
+    for (const prize of REAL_PRIZES) {
+        random -= prize.weight;
+        if (random <= 0) {
+            return prize;
+        }
+    }
+    return REAL_PRIZES[0]; // Varsayılan
+}
+
+// Ödülü görsel segment index'ine dönüştür
+function getPrizeIndex(prizeLabel) {
+    // Ödül label'ından sadece sayıyı çıkar (örn: "💰 1 TL" -> "1 TL")
+    const cleanLabel = prizeLabel.replace(/[^0-9\sTL]/g, '').trim();
+    
+    // Görsel segmentlerde ara
+    for (let i = 0; i < SEGMENTS.length; i++) {
+        if (SEGMENTS[i].label === cleanLabel) {
+            return i;
+        }
+    }
+    return 0; // Varsayılan: ilk segment
+}
+
 drawWheel(currentAngle);
 
 function startSpin() {
     if (isSpinning || spinDone) return;
+    
+    // UID kontrolü
+    if (!USER_UID) {
+        showError('Kullanıcı ID bulunamadı! Lütfen bot üzerinden çarkı açın.');
+        return;
+    }
+    
     isSpinning = true;
 
     const btn = document.getElementById('spin-btn');
@@ -302,9 +394,13 @@ function startSpin() {
 
     try { tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
 
-    // Hedef: PRIZE_IDX dilimi işaretçinin (üst = -PI/2) altına gelsin
+    // Ödülü seç
+    const selectedPrize = selectPrize();
+    const prizeIndex = getPrizeIndex(selectedPrize.label);
+    
+    // Hedef: Seçilen ödül işaretçinin (üst = -PI/2) altına gelsin
     const safeOffset = (Math.random() - 0.5) * ARC * 0.42;
-    const targetAngle = (-Math.PI / 2) - PRIZE_IDX * ARC - ARC / 2 + safeOffset;
+    const targetAngle = (-Math.PI / 2) - prizeIndex * ARC - ARC / 2 + safeOffset;
     const totalRot = 9 * 2 * Math.PI + (targetAngle - currentAngle);
 
     const duration  = 5500;
@@ -322,35 +418,50 @@ function startSpin() {
         } else {
             currentAngle = targetAngle;
             drawWheel(currentAngle);
-            onSpinComplete();
+            onSpinComplete(selectedPrize);
         }
     }
     requestAnimationFrame(frame);
 }
 
-function onSpinComplete() {
+function onSpinComplete(prize) {
     isSpinning = false;
     spinDone   = true;
     document.getElementById('spinning-ring').classList.remove('active');
     try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {}
 
-    const seg = SEGMENTS[PRIZE_IDX];
-    document.getElementById('result-emoji').textContent  = seg.emoji;
-    document.getElementById('result-prize').textContent  = PRIZE_LABEL;
-    document.getElementById('result-amount').textContent = PRIZE_AMOUNT + ' TL';
+    document.getElementById('result-emoji').textContent  = prize.label.split(' ')[0]; // Emoji
+    document.getElementById('result-prize').textContent  = prize.label;
+    document.getElementById('result-amount').textContent = prize.amount + ' TL';
     document.getElementById('result-box').classList.add('show');
     document.getElementById('spin-btn').textContent = '✅ Tamamlandı!';
 
     spawnConfetti();
 
+    // Bot'a sonucu gönder
     setTimeout(() => {
-        tg.sendData(JSON.stringify({
-            token:        TOKEN,
-            prize_idx:    PRIZE_IDX,
-            prize_amount: PRIZE_AMOUNT,
-            prize_label:  PRIZE_LABEL
-        }));
+        const resultData = {
+            action: "spin_result",
+            uid: USER_UID,
+            prize_label: prize.label,
+            prize_amount: prize.amount
+        };
+        
+        console.log('Gönderilen veri:', resultData);
+        tg.sendData(JSON.stringify(resultData));
     }, 2200);
+}
+
+function showError(message) {
+    document.getElementById('error-text').textContent = message;
+    document.getElementById('error-box').classList.add('show');
+    document.getElementById('spin-btn').style.display = 'none';
+    document.querySelector('.wheel-wrapper').style.display = 'none';
+    document.getElementById('uid-display').style.display = 'none';
+}
+
+function closeApp() {
+    tg.close();
 }
 
 const CONF_COLORS = ['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#C3A6FF','#7fff7f','#FFA07A','#ff69b4'];
@@ -376,4 +487,5 @@ function spawnConfetti() {
 }
 </script>
 </body>
-</html>
+    </html>
+    
