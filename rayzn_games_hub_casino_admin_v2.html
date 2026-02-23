@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>RAYZN Oyun Merkezi</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#070812; --bg2:#12162d; --card:#131729; --line:rgba(255,255,255,.12);
+  --txt:#eef1ff; --muted:#b7bfdc; --gold:#ffd76a; --pink:#ff4fd8; --cyan:#2ce7ff;
+  --green:#49ff9a; --red:#ff5e7e; --violet:#8a66ff;
+}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+html,body{margin:0;background:radial-gradient(1200px 700px at 30% 0%, #202762 0%, #0c1024 40%, #06070f 100%);color:var(--txt);}
+body{min-height:100vh}
+.wrap{max-width:560px;margin:0 auto;padding:12px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 55px rgba(0,0,0,.45);overflow:hidden}
+header{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;background:linear-gradient(90deg,rgba(138,102,255,.22),rgba(44,231,255,.12));border-bottom:1px solid var(--line)}
+header .t{font-weight:900;display:flex;gap:8px;align-items:center}
+header .badge{font-size:12px;border:1px solid var(--line);padding:5px 8px;border-radius:999px;color:var(--muted);background:rgba(0,0,0,.15)}
+.tabs{display:flex;gap:8px;padding:10px 10px 0;flex-wrap:wrap}
+.tab{flex:1;min-width:100px;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--txt);font-weight:800;cursor:pointer;text-align:center}
+.tab.active{background:linear-gradient(180deg,rgba(138,102,255,.35),rgba(44,231,255,.12));box-shadow:0 0 25px rgba(44,231,255,.12) inset}
+.panel{display:none;padding:10px}
+.panel.active{display:block}
+.gamebox{border:1px solid var(--line);border-radius:16px;padding:10px;background:rgba(255,255,255,.03);position:relative;overflow:hidden}
+.sub{color:var(--muted);font-size:12px;line-height:1.35}
+.notice{margin-top:8px;border:1px dashed rgba(255,215,106,.25);background:rgba(255,215,106,.05);padding:8px 10px;border-radius:12px;font-size:12px;color:#ffe9ad}
+.rewardline{margin-top:8px;text-align:center;font-weight:800;color:#ffe8aa;font-size:13px}
+.controls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button{border:1px solid var(--line);background:linear-gradient(180deg,rgba(138,102,255,.35),rgba(138,102,255,.12));color:var(--txt);padding:11px 12px;border-radius:12px;font-weight:800;cursor:pointer;flex:1;min-width:110px}
+button.secondary{background:rgba(255,255,255,.04)}
+button.green{background:linear-gradient(180deg,rgba(73,255,154,.28),rgba(73,255,154,.08))}
+button.red{background:linear-gradient(180deg,rgba(255,94,126,.28),rgba(255,94,126,.08))}
+canvas{display:block;width:100%;border-radius:14px}
+#wheelCanvas{aspect-ratio:1/1;background:radial-gradient(circle at 50% 45%, rgba(138,102,255,.2), rgba(0,0,0,0));}
+.pointer{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:26px solid var(--gold);filter:drop-shadow(0 8px 14px rgba(255,215,106,.4));transform-origin:50% 4px}
+#rocketStage{height:280px;background:linear-gradient(180deg,#0b1022,#06070f);position:relative;overflow:hidden;border-radius:14px;border:1px solid var(--line)}
+.star{position:absolute;background:#fff;border-radius:50%;opacity:.8;animation:twinkle 1.8s infinite alternate}
+@keyframes twinkle{from{opacity:.25}to{opacity:.95}}
+#rocket{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:42px;filter:drop-shadow(0 12px 20px rgba(255,100,80,.35));transition:transform .06s linear}
+.flame{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:14px;height:24px;background:radial-gradient(circle at 50% 20%, #ffe89d 0, #ff8c42 45%, rgba(255,80,40,.0) 80%);border-radius:50%;filter:blur(1px);opacity:.6}
+#rocketMeter{position:absolute;left:10px;right:10px;top:10px;height:14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);overflow:hidden}
+#rocketBar{height:100%;width:0%;background:linear-gradient(90deg,#49ff9a,#2ce7ff,#ffd76a,#ff5e7e)}
+#rocketMul{position:absolute;right:12px;top:32px;font-weight:900;color:#bceeff;text-shadow:0 0 12px rgba(44,231,255,.35)}
+#bjTable{height:300px;background:radial-gradient(circle at 50% 40%, rgba(73,255,154,.13), rgba(0,0,0,.0) 65%),linear-gradient(180deg,#0b1a13,#07100b);border-radius:14px;border:1px solid var(--line);padding:10px;position:relative;overflow:hidden}
+.bjArea{min-height:95px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;padding:8px;margin-bottom:8px}
+.bjTitle{font-size:12px;color:var(--muted);margin-bottom:6px}
+.cards{display:flex;gap:8px;flex-wrap:wrap;min-height:58px}
+.cardx{width:52px;height:72px;border-radius:10px;background:linear-gradient(180deg,#fff,#eceef7);color:#1f2437;border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;justify-content:space-between;padding:5px 6px;font-weight:900;box-shadow:0 7px 16px rgba(0,0,0,.25);transform:translateY(-8px) scale(.95);opacity:0;animation:deal .25s forwards}
+.cardx.red{color:#d21b45}
+@keyframes deal{to{transform:translateY(0) scale(1);opacity:1}}
+.cardback{background:linear-gradient(180deg,#7f4dff,#3c2b7a);color:#fff;display:grid;place-items:center}
+.pulseWin{animation:pulseWin .7s ease 2}
+@keyframes pulseWin{0%,100%{box-shadow:0 0 0 rgba(73,255,154,0)}50%{box-shadow:0 0 35px rgba(73,255,154,.25)}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+.modal{width:min(430px,100%);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.modal h3{margin:0 0 8px;font-size:16px}.modal p{margin:0 0 10px;color:var(--muted);font-size:13px;line-height:1.35}
+.row{display:flex;gap:8px}.row input{flex:1;background:rgba(255,255,255,.05);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(10,14,26,.92);border:1px solid var(--line);padding:10px 12px;border-radius:12px;display:none;z-index:10;max-width:92%;text-align:center;font-weight:700}
+.confetti{position:fixed;top:-12px;width:8px;height:14px;opacity:.9;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.95}}
+.smallgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:8px;border-radius:10px;background:rgba(255,255,255,.03)}
+.kv b{color:var(--txt)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <header>
+      <div class="t">🎮 <span>RAYZN Oyun Merkezi</span></div>
+      <div class="badge" id="uidBadge">ID: -</div>
+    </header>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="wheel">🎰 Çark</div>
+      <div class="tab" data-tab="rocket">🚀 Roket</div>
+      <div class="tab" data-tab="blackjack">🃏 Blackjack</div>
+      <div class="tab" data-tab="vip">👑 VIP Tema</div>
+    </div>
+
+    <div class="panel active" id="tab-wheel">
+      <div class="gamebox">
+        <div class="pointer" id="wheelPointer"></div>
+        <canvas id="wheelCanvas" width="900" height="900"></canvas>
+        <div class="rewardline">💸 1 TL'den 2000 TL'ye kadar bakiye kazanma şansı</div>
+        <div class="notice">⚠️ Not: Görselde büyük ödüller görünür, ancak gerçek oyun ödül olasılığı botta sabittir. <b>1 TL %99</b>, <b>5 TL %1</b>. Diğer tutarlar sadece görseldir.</div>
+        <div class="controls"><button id="spinBtn">🎰 Çevir</button><button class="secondary" id="idBtn1">🪪 ID</button></div>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-rocket">
+      <div class="gamebox">
+        <div id="rocketStage">
+          <div id="rocketMeter"><div id="rocketBar"></div></div>
+          <div id="rocketMul">x1.00</div>
+          <div id="rocket">🚀</div><div class="flame" id="flame"></div>
+        </div>
+        <div class="rewardline">💸 1 TL'den 2000 TL'ye kadar bakiye kazanma şansı</div>
+        <div class="notice">⚠️ Görsel crash oyunu animasyondur. Ödül bakiyeye direkt geçmez; <b>admin onayı</b> sonrası yatırılır. Gerçek ödül oranı sabit: 1 TL %99, 5 TL %1.</div>
+        <div class="controls"><button id="rocketStartBtn">🚀 Başlat</button><button class="red" id="rocketCashBtn">💰 Al / Talep Gönder</button><button class="secondary" id="idBtn2">🪪 ID</button></div>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-blackjack">
+      <div class="gamebox">
+        <div id="bjTable">
+          <div class="bjArea" id="dealerArea">
+            <div class="bjTitle">Kasa • Puan: <span id="dealerScore">0</span></div>
+            <div class="cards" id="dealerCards"></div>
+          </div>
+          <div class="bjArea" id="playerArea">
+            <div class="bjTitle">Sen • Puan: <span id="playerScore">0</span></div>
+            <div class="cards" id="playerCards"></div>
+          </div>
+          <div class="smallgrid">
+            <div class="kv">Bahis görünüm: <b>Demo</b></div>
+            <div class="kv">Sonuç: <b id="bjResult">Bekleniyor</b></div>
+          </div>
+        </div>
+        <div class="rewardline">💸 1 TL'den 2000 TL'ye kadar bakiye kazanma şansı</div>
+        <div class="notice">⚠️ Blackjack animasyonlu demo sonucu talep olarak gönderilir. Gerçek bakiye işlemi sadece admin onayıyla yapılır. Ödül oranı sabit (1 TL %99 / 5 TL %1).</div>
+        <div class="controls"><button id="bjNewBtn">🃏 Yeni El</button><button id="bjHitBtn" class="green">➕ Hit</button><button id="bjStandBtn" class="secondary">✋ Stand</button><button id="idBtn3" class="secondary">🪪 ID</button></div>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-vip">
+      <div class="gamebox" style="background:linear-gradient(180deg,rgba(255,215,106,.07),rgba(138,102,255,.08)); border-color:rgba(255,215,106,.2)">
+        <div style="font-weight:900; font-size:16px; margin-bottom:8px">👑 VIP Oyun Teması Önizleme</div>
+        <div class="sub">Mor/altın neon stil, daha güçlü glow, özel konfeti ve premium giriş animasyonu. (Gerçek ödül oranları yine değişmez.)</div>
+        <div style="height:180px; margin-top:10px; border-radius:14px; border:1px solid rgba(255,215,106,.18); background:radial-gradient(circle at 50% 30%, rgba(255,215,106,.18), rgba(138,102,255,.08), rgba(0,0,0,.0)); position:relative; overflow:hidden">
+          <div style="position:absolute; inset:0; background:repeating-radial-gradient(circle at 50% 50%, rgba(255,215,106,.08) 0 4px, transparent 4px 10px); animation: vipPulse 2.4s infinite ease-in-out"></div>
+          <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:54px; filter:drop-shadow(0 0 18px rgba(255,215,106,.35));">👑</div>
+        </div>
+        <div class="controls"><button id="idBtn4" class="secondary">🪪 ID Düzenle</button><button id="vipConfettiBtn">✨ Efekt Testi</button></div>
+        <div class="rewardline">💸 1 TL'den 2000 TL'ye kadar bakiye kazanma şansı</div>
+      </div>
+    </div>
+
+    <div class="sub" style="padding:10px 12px 14px">
+      🛡️ Güvenlik: Oyun sonucu <b>otomatik bakiyeye eklenmez</b>. Tüm ödüller <b>admin onayına</b> düşer. Bot tarafı gerçek ödülü doğrular.
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="idOverlay">
+  <div class="modal">
+    <h3>🪪 Oyun Öncesi ID Zorunlu</h3>
+    <p>Oyuna başlamadan önce <b>Telegram kullanıcı ID</b> girmeniz gerekir. Bu ID ile oyun ödül talebi admin paneline düşer ve onaylandığında bakiyenize aktarılır.</p>
+    <p>Telegram algılanan ID: <b id="tgIdText">-</b></p>
+    <div class="row">
+      <input id="uidInput" type="text" inputmode="numeric" placeholder="Örn: 6758752018" maxlength="14" />
+      <button id="saveUidBtn">Kaydet</button>
+    </div>
+    <div class="notice" style="margin-top:10px">⚠️ Yanlış ID girersen ödül başka hesaba gidebilir. Admin paneli onayında yine kontrol edilir.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+  const tg = window.Telegram?.WebApp || null;
+  try{ tg?.ready(); tg?.expand(); }catch(e){}
+
+  // ---------- global helpers ----------
+  const displayPrizes = ["💰 1 TL","🎁 5 TL","💎 10 TL","🔥 30 TL","⭐ 50 TL","🌟 100 TL","💵 200 TL","💎 500 TL","👑 1.500 TL","🏆 2.000 TL"];
+  // Görsel ödüller görünür; gerçek oran backend'de sabit olmalı: 1 TL %99, 5 TL %1
+  function fixedRewardPreview(){ return Math.random() < 0.99 ? {label:"💰 1 TL", amount:1} : {label:"🎁 5 TL", amount:5}; }
+  function toast(t){ const e=document.getElementById('toast'); e.textContent=t; e.style.display='block'; clearTimeout(e._t); e._t=setTimeout(()=>e.style.display='none',3500); }
+  function getTgId(){ try{return String(tg?.initDataUnsafe?.user?.id||'');}catch(e){return '';} }
+  function getSavedUid(){ return localStorage.getItem('rayzn_uid')||''; }
+  function setSavedUid(v){ localStorage.setItem('rayzn_uid', v); updateUidBadge(); }
+  function updateUidBadge(){ document.getElementById('uidBadge').textContent = 'ID: ' + (getSavedUid()||'-'); }
+  function ensureUid(){ if(!getSavedUid()){ openIdModal(); return false; } return true; }
+  function burstConfetti(n=28){ for(let i=0;i<n;i++){ const d=document.createElement('div'); d.className='confetti'; d.style.left=(Math.random()*100)+'vw'; d.style.background=["#ffd76a","#ff4fd8","#2ce7ff","#49ff9a","#ffffff"][Math.floor(Math.random()*5)]; d.style.animationDuration=(1.6+Math.random()*1.5)+'s'; d.style.transform=`translateY(0) rotate(${Math.random()*120}deg)`; document.body.appendChild(d); setTimeout(()=>d.remove(), 3200);} }
+
+  function sendGameRequest(game, meta={}){
+    const payload = {
+      action:'game_reward_request',
+      game,
+      user_id:getSavedUid(),
+      tg_user_id:getTgId()||null,
+      ts:Date.now(),
+      // sadece görsel/demo bilgi; gerçek ödül backend tarafında hesaplanmalı
+      preview_reward: meta.preview_reward || null,
+      meta
+    };
+    try{
+      if(tg && tg.sendData){ tg.sendData(JSON.stringify(payload)); }
+      else console.log('sendData payload', payload);
+      toast('✅ Ödül talebi gönderildi. Admin onayı bekleniyor.');
+    }catch(e){ toast('⚠️ Telegram verisi gönderilemedi.'); }
+  }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- ID modal ----------
+  const idOverlay = document.getElementById('idOverlay');
+  const uidInput = document.getElementById('uidInput');
+  const tgIdText = document.getElementById('tgIdText');
+  function openIdModal(){ idOverlay.style.display='flex'; tgIdText.textContent = getTgId()||'-'; uidInput.value = getSavedUid(); uidInput.focus(); }
+  function saveUid(){ const v=(uidInput.value||'').trim(); if(!/^\d{4,14}$/.test(v)){ toast('❌ Geçerli ID gir.'); return; } setSavedUid(v); idOverlay.style.display='none'; toast('✅ ID kaydedildi.'); }
+  document.getElementById('saveUidBtn').addEventListener('click', saveUid);
+  idOverlay.addEventListener('click',e=>{ if(e.target===idOverlay) idOverlay.style.display='none'; });
+  ;['idBtn1','idBtn2','idBtn3','idBtn4'].forEach(id=>document.getElementById(id).addEventListener('click',openIdModal));
+  updateUidBadge();
+  if(!getSavedUid()) setTimeout(openIdModal, 250);
+
+  // ---------- WHEEL (casino animation) ----------
+  const wCanvas = document.getElementById('wheelCanvas'); const wctx = wCanvas.getContext('2d');
+  const wheelPointer = document.getElementById('wheelPointer');
+  let rot=0, spinState={active:false,t0:0,dur:0,target:0};
+  const segs = displayPrizes.map((label,i)=>({label, color:i%2? '#1d2450':'#2a1459'}));
+  function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
+  function drawWheel(ts=0){
+    const W=wCanvas.width,H=wCanvas.height,cx=W/2,cy=H/2,r=360;
+    wctx.clearRect(0,0,W,H);
+    // neon bg pulse
+    const pulse = 0.5+0.5*Math.sin(ts*0.003);
+    let g = wctx.createRadialGradient(cx,cy,60,cx,cy,r+70); g.addColorStop(0,`rgba(138,102,255,${0.18+0.08*pulse})`); g.addColorStop(0.6,`rgba(44,231,255,${0.12+0.06*(1-pulse)})`); g.addColorStop(1,'rgba(0,0,0,0)');
+    wctx.fillStyle=g; wctx.beginPath(); wctx.arc(cx,cy,r+70,0,Math.PI*2); wctx.fill();
+
+    // outer bulbs
+    for(let i=0;i<48;i++){
+      const a=i*Math.PI*2/48+rot*0.2, rr=r+28; const x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr;
+      const on=((i+Math.floor(ts/90))%4)<2;
+      wctx.fillStyle = on ? '#ffd76a' : 'rgba(255,215,106,.25)';
+      wctx.shadowColor = on ? '#ffd76a' : 'transparent'; wctx.shadowBlur = on ? 18:0;
+      wctx.beginPath(); wctx.arc(x,y,4.5,0,Math.PI*2); wctx.fill();
+    }
+    wctx.shadowBlur=0;
+
+    wctx.save(); wctx.translate(cx,cy); wctx.rotate(rot);
+    const n=segs.length, step=Math.PI*2/n;
+    for(let i=0;i<n;i++){
+      const a0 = -Math.PI/2 + i*step, a1=a0+step;
+      wctx.beginPath(); wctx.moveTo(0,0); wctx.arc(0,0,r,a0,a1); wctx.closePath();
+      const grad = wctx.createLinearGradient(Math.cos(a0)*r,Math.sin(a0)*r,Math.cos(a1)*r,Math.sin(a1)*r);
+      grad.addColorStop(0,segs[i].color); grad.addColorStop(1,i%2?'#381f74':'#1f315d');
+      wctx.fillStyle = grad; wctx.fill();
+      wctx.strokeStyle='rgba(255,255,255,.14)'; wctx.lineWidth=2; wctx.stroke();
+
+      // text glow
+      const mid=(a0+a1)/2;
+      wctx.save(); wctx.rotate(mid); wctx.translate(r*0.63,0); wctx.rotate(Math.PI/2);
+      wctx.fillStyle='#fff3c7'; wctx.font='bold 28px system-ui'; wctx.textAlign='center'; wctx.textBaseline='middle';
+      wctx.shadowColor='rgba(255,215,106,.35)'; wctx.shadowBlur=10;
+      wctx.fillText(segs[i].label.replace('💰 ','').replace('🎁 ',''),0,0);
+      wctx.restore();
+    }
+    // center cap
+    wctx.shadowColor='rgba(44,231,255,.35)'; wctx.shadowBlur=18;
+    const cg = wctx.createRadialGradient(0,0,5,0,0,46); cg.addColorStop(0,'#fff'); cg.addColorStop(.35,'#dce6ff'); cg.addColorStop(1,'#7757ff');
+    wctx.fillStyle=cg; wctx.beginPath(); wctx.arc(0,0,44,0,Math.PI*2); wctx.fill();
+    wctx.shadowBlur=0; wctx.restore();
+  }
+  function animateWheel(ts){
+    if(spinState.active){
+      const t=Math.min(1,(ts-spinState.t0)/spinState.dur), e=easeOutCubic(t);
+      rot = spinState.target*e;
+      // pointer bounce (segment ticks visual)
+      wheelPointer.style.transform = `translateX(-50%) rotate(${Math.sin(ts*0.06)*(3+6*(1-t))}deg)`;
+      if(t>=1){
+        spinState.active=false; wheelPointer.style.transform='translateX(-50%) rotate(0deg)';
+        burstConfetti(34);
+        const preview=fixedRewardPreview();
+        toast(`🎉 Görsel sonuç: ${preview.label} (admin onayı beklenir)`);
+        sendGameRequest('wheel', {preview_reward:preview, ui:'casino_wheel_v2'});
+      }
+    }
+    drawWheel(ts);
+    requestAnimationFrame(animateWheel);
+  }
+  requestAnimationFrame(animateWheel);
+  document.getElementById('spinBtn').addEventListener('click', ()=>{
+    if(spinState.active) return; if(!ensureUid()) return;
+    spinState.active=true; spinState.t0=performance.now(); spinState.dur=5200+Math.random()*1000; const extra=7+Math.floor(Math.random()*4); spinState.target=Math.PI*2*extra + Math.random()*Math.PI*2;
+    toast('🎰 Çark dönüyor...');
+  });
+
+  // ---------- ROCKET game animation ----------
+  const rocketStage=document.getElementById('rocketStage'); const rocket=document.getElementById('rocket'); const flame=document.getElementById('flame');
+  const rocketBar=document.getElementById('rocketBar'); const rocketMul=document.getElementById('rocketMul');
+  for(let i=0;i<55;i++){ const s=document.createElement('div'); s.className='star'; const z=Math.random()*3+1; s.style.width=s.style.height=(z)+'px'; s.style.left=(Math.random()*100)+'%'; s.style.top=(Math.random()*100)+'%'; s.style.animationDuration=(1+Math.random()*2.3)+'s'; s.style.animationDelay=(Math.random()*2)+'s'; rocketStage.appendChild(s); }
+  let rocketRun=null;
+  function startRocket(){
+    if(!ensureUid()) return;
+    if(rocketRun) return;
+    let t=0, crashed=false, cashed=false;
+    rocketRun=setInterval(()=>{
+      t += 0.06;
+      let mul = Math.exp(t/4); if(mul>12) mul=12;
+      rocketMul.textContent='x'+mul.toFixed(2);
+      rocketBar.style.width=Math.min(100, mul/12*100)+'%';
+      const y = Math.min(210, t*28 + Math.sin(t*9)*2);
+      rocket.style.bottom = (18+y)+'px';
+      rocket.style.transform = `translateX(-50%) rotate(${Math.sin(t*7)*2}deg) scale(${1+mul*0.008})`;
+      flame.style.opacity = String(.35 + Math.random()*.65);
+      flame.style.height = (18 + Math.random()*16)+'px';
+      // visual crash chance (demo only)
+      if(!cashed && Math.random() < 0.010 + t*0.0018 && mul>1.15){ crashed=true; endRocket('crash',mul); }
+      if(mul>=12 && !cashed){ crashed=true; endRocket('crash',mul); }
+    }, 60);
+
+    function endRocket(type,mul){
+      clearInterval(rocketRun); rocketRun=null;
+      if(type==='cash'){
+        rocketStage.classList.add('pulseWin'); setTimeout(()=>rocketStage.classList.remove('pulseWin'),900);
+        burstConfetti(26);
+        const preview=fixedRewardPreview();
+        sendGameRequest('rocket', {preview_reward:preview, multiplier: Number(mul.toFixed(2)), ui:'rocket_v2'});
+      }else{
+        rocket.textContent='💥'; flame.style.opacity='0'; toast('💥 Roket patladı! Yeni tur başlat.');
+        setTimeout(()=>{ rocket.textContent='🚀'; rocket.style.bottom='18px'; rocket.style.transform='translateX(-50%)'; flame.style.opacity='.6'; rocketMul.textContent='x1.00'; rocketBar.style.width='0%'; },900);
+      }
+    }
+
+    document.getElementById('rocketCashBtn').onclick = ()=>{
+      if(!rocketRun) return; cashed=true; const cur = parseFloat((rocketMul.textContent||'x1').replace('x',''))||1; clearInterval(rocketRun); rocketRun=null; endRocket('cash',cur);
+    };
+  }
+  document.getElementById('rocketStartBtn').addEventListener('click', ()=>{ startRocket(); toast('🚀 Roket başladı! Doğru anda al.'); });
+
+  // ---------- BLACKJACK animation demo ----------
+  const suits=['♠','♥','♦','♣']; const vals=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  let deck=[], player=[], dealer=[], bjActive=false, dealerHoleHidden=true;
+  const dCards=document.getElementById('dealerCards'), pCards=document.getElementById('playerCards');
+  function newDeck(){ deck=[]; for(const s of suits) for(const v of vals) deck.push({s,v}); for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; } }
+  function drawCard(){ return deck.pop(); }
+  function cValue(c){ if(['J','Q','K'].includes(c.v)) return 10; if(c.v==='A') return 11; return Number(c.v); }
+  function handValue(hand){ let t=hand.reduce((a,c)=>a+cValue(c),0); let aces=hand.filter(c=>c.v==='A').length; while(t>21 && aces>0){ t-=10; aces--; } return t; }
+  function renderHand(el, hand, hideSecond=false){ el.innerHTML=''; hand.forEach((c,idx)=>{ const div=document.createElement('div'); const hidden = hideSecond && idx===1; const red = c.s==='♥'||c.s==='♦'; div.className='cardx'+(hidden?' cardback':(red?' red':'')); div.style.animationDelay=(idx*70)+'ms'; if(hidden){ div.textContent='🂠'; }
+    else { div.innerHTML=`<div>${c.v}</div><div style="text-align:center;font-size:16px">${c.s}</div><div style="text-align:right">${c.v}</div>`; }
+    el.appendChild(div);
+  }); }
+  function updateBjScores(){ document.getElementById('playerScore').textContent = handValue(player); document.getElementById('dealerScore').textContent = dealerHoleHidden ? (dealer.length? cValue(dealer[0]) : 0) : handValue(dealer); }
+  function setBjResult(t){ document.getElementById('bjResult').textContent=t; }
+  function bjNew(){ if(!ensureUid()) return; newDeck(); player=[]; dealer=[]; bjActive=true; dealerHoleHidden=true; setBjResult('Oynanıyor'); player.push(drawCard(),drawCard()); dealer.push(drawCard(),drawCard()); renderHand(pCards, player,false); renderHand(dCards, dealer,true); updateBjScores(); toast('🃏 Yeni el başladı.'); checkBjImmediate(); }
+  function checkBjImmediate(){ if(!bjActive) return; if(handValue(player)===21){ bjStand(true); } }
+  function bjHit(){ if(!bjActive) return; player.push(drawCard()); renderHand(pCards, player,false); updateBjScores(); if(handValue(player)>21){ dealerHoleHidden=false; renderHand(dCards,dealer,false); updateBjScores(); bjActive=false; setBjResult('Bust'); toast('❌ Bust!'); } }
+  function bjStand(auto=false){ if(!bjActive && !auto) return; dealerHoleHidden=false; while(handValue(dealer)<17){ dealer.push(drawCard()); }
+    renderHand(dCards,dealer,false); renderHand(pCards,player,false); updateBjScores(); const pv=handValue(player), dv=handValue(dealer); bjActive=false;
+    let outcome='lose'; if(pv>21) outcome='lose'; else if(dv>21||pv>dv) outcome='win'; else if(pv===dv) outcome='push';
+    setBjResult(outcome==='win'?'Kazandın':outcome==='push'?'Berabere':'Kaybettin');
+    if(outcome==='win'){ burstConfetti(24); const preview=fixedRewardPreview(); sendGameRequest('blackjack', {preview_reward:preview, player:pv, dealer:dv, ui:'blackjack_v2'}); toast('✅ Blackjack ödül talebi gönderildi.'); }
+    else if(outcome==='push'){ toast('➖ Berabere. Talep oluşturulmadı.'); }
+    else { toast('❌ El kaybedildi.'); }
+  }
+  document.getElementById('bjNewBtn').addEventListener('click', bjNew);
+  document.getElementById('bjHitBtn').addEventListener('click', bjHit);
+  document.getElementById('bjStandBtn').addEventListener('click', ()=>bjStand(false));
+
+  // ---------- VIP visual button ----------
+  document.getElementById('vipConfettiBtn').addEventListener('click', ()=>{ burstConfetti(40); toast('✨ VIP efekt testi'); });
+
+})();
+</script>
+<style>@keyframes vipPulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}</style>
+</body>
+</html>
